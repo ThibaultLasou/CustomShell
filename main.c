@@ -14,10 +14,9 @@
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
-	char *loginName;
-	char *machineName;
-	char **newArgv, i, res;
-	int newArgc;
+	char *loginName, *machineName;
+	char **newArgv;
+	int newArgc, res;
 	pid_t pid;
 	struct utsname machin;
 	FILE *hist;
@@ -46,8 +45,8 @@ int main(int argc, char **argv, char *envp[])
 			pid = fork();
 			switch(pid)
 			{
-				case -1 : 
-					printf("Erreur de forkation\n"); 
+				case -1 :
+					printf("Erreur de forkation\n");
 					exit(EXIT_FAILURE);
 					break;
 				case 0 :
@@ -69,4 +68,3 @@ int main(int argc, char **argv, char *envp[])
 	printf("\n");
 	return 0;
 }
-
