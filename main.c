@@ -10,6 +10,17 @@
 
 #include "cmds.h"
 
+void printPrefix(struct utsname machin)
+{
+	if(strncmp(getenv("PWD"), getenv("HOME"), strlen(getenv("HOME"))) == 0)
+	{
+		printf("%s@%s:~%s >> ", getenv("LOGNAME"), machin.nodename, getenv("PWD")+strlen(getenv("HOME")));
+	}
+	else
+	{
+		printf("%s@%s:%s >> ", getenv("LOGNAME"), machin.nodename, getenv("PWD"));
+	}
+}
 
 int main(int argc, char **argv, char *envp[])
 {
@@ -23,7 +34,7 @@ int main(int argc, char **argv, char *envp[])
 
 	uname(&machin);
 	hist = fopen("history","a+");
-	printf("%s@%s:%s >> ", getenv("LOGNAME"), machin.nodename, getenv("PWD"));
+	printPrefix(machin);
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{
 		fprintf(hist, buffer);
@@ -63,7 +74,7 @@ int main(int argc, char **argv, char *envp[])
 					break;
 			}
 		}
-		printf("%s@%s:%s >> ", getenv("LOGNAME"), machin.nodename, getenv("PWD"));
+		printPrefix(machin);
 	}
 	printf("\n");
 	return 0;
