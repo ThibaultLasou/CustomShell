@@ -5,9 +5,20 @@
 void cd(char *path)
 {
 	char *WD;
-	if(chdir(path) == -1)
+	if(path[0] == '~')
 	{
-		printf("%s\n", strerror(errno));
+		chdir(getenv("HOME"));
+		if(strlen(path) > 2)
+		{
+			cd(&path[2]);
+		}
+	}
+	else
+	{
+		if(chdir(path) == -1)
+		{
+			printf("%s\n", strerror(errno));
+		}
 	}
 	WD = getcwd(NULL, 0);
 	setenv("PWD", WD, 1);
