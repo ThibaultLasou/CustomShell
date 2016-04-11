@@ -1,5 +1,7 @@
 #include "cmds.h"
 
+/* <3 */
+
 void cd(char *path)
 {
 	char *WD;
