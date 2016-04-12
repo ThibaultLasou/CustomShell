@@ -1,7 +1,5 @@
 #include "cmds.h"
 
-/* <3 */
-
 void cd(char *path)
 {
 	char *WD;
@@ -47,10 +45,23 @@ void makeCmd(char *buffer, char ***args)
 			nbArgs++;
 		}
 	}
-	*args = malloc(sizeof(char *)*nbArgs+2);
+	*args = malloc(sizeof(char *)*(nbArgs+2));
 	do
 	{
-		for(i=debutMot;buffer[i]!=' ' && buffer[i]!='\n';i++);
+		for(i=debutMot;buffer[i]!='\n';i++)
+		{
+			if(buffer[i] == ' ')
+			{
+				if(buffer[i-1] == '\\')
+				{
+					strcpy(&(buffer[i-1]), &(buffer[i]));
+				}
+				else
+				{
+					break;
+				}
+			}	
+		}
 		finMot = i;
 		(*args)[numArg] = malloc(sizeof(char)*finMot-debutMot);
 		strncpy((*args)[numArg], &(buffer[debutMot]), finMot-debutMot);
