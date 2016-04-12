@@ -25,15 +25,18 @@ void printPrefix(struct utsname machin)
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
-	char *loginName, *machineName;
+	char *loginName, *machineName, *histPath;
 	char **newArgv;
 	int newArgc, res;
 	pid_t pid;
 	struct utsname machin;
 	FILE *hist;
 
+	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
+	sprintf(histPath,"%s/.history", getenv("HOME"));
+	printf("%s", histPath);
 	uname(&machin);
-	hist = fopen("history","a+");
+	hist = fopen(histPath,"a+");
 	printPrefix(machin);
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{

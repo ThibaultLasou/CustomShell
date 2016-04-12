@@ -37,7 +37,7 @@ void history(FILE *histo)
 
 void makeCmd(char *buffer, char ***args)
 {
-	int i, finMot=0, debutMot=0, nbArgs=0, numArg = 0;
+	int i, finMot=0, debutMot=0, nbArgs=1, numArg = 0;
 	for(i=0;buffer[i]!='\n';i++)
 	{
 		if(buffer[i] == ' ')
@@ -45,7 +45,7 @@ void makeCmd(char *buffer, char ***args)
 			nbArgs++;
 		}
 	}
-	*args = malloc(sizeof(char *)*(nbArgs+2));
+	*args = malloc(sizeof(char *)*(nbArgs+1));
 	do
 	{
 		for(i=debutMot;buffer[i]!='\n';i++)
