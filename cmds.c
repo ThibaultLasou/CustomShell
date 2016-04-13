@@ -3,7 +3,11 @@
 void cd(char *path)
 {
 	char *WD;
-	if(path[0] == '~')
+	if(path == NULL || path[0] == '\0')
+	{
+		chdir(getenv("HOME"));
+	}
+	else if(path[0] == '~')
 	{
 		chdir(getenv("HOME"));
 		if(strlen(path) > 2)
