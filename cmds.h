@@ -8,13 +8,7 @@
 
 #define BUF_SIZE 512
 
-/*
- * struct cmd
- * {
- *		char *cmd
- *		void *fonc;
- * }
- */
+
 
 void cd(char *path);
 void makeCmd(char *buffer, char ***args);

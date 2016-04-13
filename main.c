@@ -10,6 +10,9 @@
 
 #include "cmds.h"
 
+/*
+ * Affichage de l'invite de commande
+ */
 void printPrefix(struct utsname machine)
 {
 	if(strncmp(getenv("PWD"), getenv("HOME"), strlen(getenv("HOME"))) == 0)
@@ -21,7 +24,8 @@ void printPrefix(struct utsname machine)
 		printf("%s@%s:%s >> ", getenv("LOGNAME"), machine.nodename, getenv("PWD"));
 	}
 }
-
+/*
+ * */
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
@@ -32,12 +36,13 @@ int main(int argc, char **argv, char *envp[])
 	struct utsname machine;
 	FILE *hist;
 
+	// Ouverture du fichier d'historique
 	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
 	sprintf(histPath,"%s/.history", getenv("HOME"));
-
+	hist = fopen(histPath,"a+");
+	
 	uname(&machine);
 	
-	hist = fopen(histPath,"a+");
 	printPrefix(machine);
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{
