@@ -31,6 +31,13 @@ int main(int argc, char **argv, char *envp[])
 	pid_t pid;
 	struct utsname machine;
 	FILE *hist;
+	
+/*  int i;
+	for(i=0;envp[i]!=NULL;i++)
+	{
+		printf("%s\n", envp[i]);
+	}
+*/
 
 	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
 	sprintf(histPath,"%s/.history", getenv("HOME"));
@@ -41,41 +48,43 @@ int main(int argc, char **argv, char *envp[])
 	printPrefix(machine);
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{
-		fprintf(hist, buffer);
-		makeCmd(buffer, &newArgv);
-		if(strcmp("cd", newArgv[0]) == 0)
+		if(buffer[0]!='\n')
 		{
-			cd(newArgv[1]);
-		}
-		else if(strcmp("exit", newArgv[0]) == 0)
-		{
-			exit(EXIT_SUCCESS);
-		}
-		else if(strcmp("history", newArgv[0]) == 0)
-		{
-			history(hist);
-		}
-		else
-		{
-			pid = fork();
-			switch(pid)
+			fprintf(hist, buffer);
+			makeCmd(buffer, &newArgv);
+			if(strcmp("cd", newArgv[0]) == 0)
 			{
-				case -1 :
-					printf("Erreur de forkation\n");
-					exit(EXIT_FAILURE);
-					break;
-				case 0 :
-					/* Processus fils */
-					res = execv(newArgv[0], newArgv);
-					if(res == -1)
-					{
-						printf("%s\n", strerror(errno));
+				cd(newArgv[1]);
+			}
+			else if(strcmp("exit", newArgv[0]) == 0)
+			{
+				exit(EXIT_SUCCESS);
+			}
+			else if(strcmp("history", newArgv[0]) == 0)
+			{
+				history(hist);
+			}
+ 			else
+			{
+				fflush(hist);
+				pid = fork();
+				switch(pid)
+				{
+					case -1 :
+						printf("Erreur de forkation\n");
 						exit(EXIT_FAILURE);
-					}
-					exit(EXIT_SUCCESS);
-				default :
-					waitpid(pid, NULL, 0);
-					break;
+						break;
+					case 0 :
+						res = execv(newArgv[0], newArgv);
+						if(res == -1)
+						{
+							printf("%s\n", strerror(errno));
+							exit(EXIT_FAILURE);
+						}
+					default :
+						waitpid(pid, NULL, 0);
+						break;
+				}
 			}
 		}
 		printPrefix(machine);
