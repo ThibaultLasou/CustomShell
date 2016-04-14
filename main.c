@@ -72,24 +72,7 @@ int main(int argc, char **argv, char *envp[])
  			else
 			{
 				fflush(hist);
-				pid = fork();
-				switch(pid)
-				{
-					case -1 :
-						printf("Erreur de forkation\n");
-						exit(EXIT_FAILURE);
-						break;
-					case 0 :
-						res = execv(newArgv[0], newArgv);
-						if(res == -1)
-						{
-							printf("%s\n", strerror(errno));
-							exit(EXIT_FAILURE);
-						}
-					default :
-						waitpid(pid, NULL, 0);
-						break;
-				}
+				execute(newArgv);
 			}
 		}
 		printPrefix(machine);

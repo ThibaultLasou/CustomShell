@@ -1,5 +1,17 @@
 #include "cmds.h"
 
+void touch(char **args)
+{
+
+}
+
+void cat(char **args)
+{
+	/* si path == NULL, lire stdin et l'afficher
+	 * sinon afficher le contenu du fichier passé en paramètre
+	 */
+}
+
 void cd(char *path)
 {
 	char *WD;
