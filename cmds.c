@@ -10,35 +10,31 @@ void cat(char **args)
 	/* si path == NULL, lire stdin et l'afficher
 	 * sinon afficher le contenu du fichier passé en paramètre
 	 */
- 	int i = 1 , j=1;
-	char line[512];
+	int i = 1 , j=1;
+	char line[BUF_SIZE];
 	while(args[i] != NULL)
 	{	
-			/* Ouverture du fichier */
-		   FILE *fd = fopen ( args[i], "r" );
-			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
-			if(fd == NULL)
-			{
-				printf("cat: %s : Aucun fichier ou dossier de ce type \n " , args[i]);
-				//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
-				i++;
-				continue;
-			}
-			/* Sinon afficher le contenu du fichier */
-			else
-			{
-				 if ( fd != NULL )
-				{
-						  while ( fgets ( line, sizeof line, fd ) != NULL ) /* lire une ligne */
-					{
-						 printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
-						 j++;
-					}
-				}
-			}
-						
+		/* Ouverture du fichier */
+		FILE *fd = fopen ( args[i], "r" );
+		/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
+		if(fd == NULL)
+		{
+			printf("cat: %s : %s\n " , args[i], strerror(errno));
+			//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
 			i++;
+			continue;
 		}
+		/* Sinon afficher le contenu du fichier */
+		else
+		{
+				while(fgets(line, BUF_SIZE, fd) != NULL) /* lire une ligne */
+				{
+					printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
+					j++;
+				}
+		}
+		i++;
+	}
 }
 
 void cd(char *path)
