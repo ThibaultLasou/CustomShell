@@ -1,6 +1,5 @@
 #include "exec.h"
 
-/* rempli paths avec les différents chemins possibles pour exec */
 void makePaths(char ***paths, char *exec)
 {
 	/* c'est un peu comme makeCmd */
@@ -19,8 +18,9 @@ void execute(char **newArgv)
 			exit(EXIT_FAILURE);
 			break;
 		case 0 :
+			// Processus fils
 			i = 0;
-			do
+			do // On essaye tous les chemins possibles
 			{
 				res = execv(newArgv[0], newArgv);
 				newArgv[0] = paths[i];
@@ -29,6 +29,7 @@ void execute(char **newArgv)
 			printf("%s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		default :
+			// Processus père
 			waitpid(pid, NULL, 0);
 			break;
 	}
