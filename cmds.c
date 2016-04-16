@@ -4,7 +4,16 @@ void touch(char **args)
 {
 
 }
-
+void afficherContenuFichier(FILE* file)
+{
+	int j=1;
+	char line[BUF_SIZE];
+					while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
+				{
+					printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
+					j++;
+				}
+}
 void cat(char **args)
 {
 	/* si path == NULL, lire stdin et l'afficher
@@ -27,11 +36,7 @@ void cat(char **args)
 		/* Sinon afficher le contenu du fichier */
 		else
 		{
-				while(fgets(line, BUF_SIZE, fd) != NULL) /* lire une ligne */
-				{
-					printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
-					j++;
-				}
+				afficherContenuFichier(fd);
 		}
 		i++;
 	}

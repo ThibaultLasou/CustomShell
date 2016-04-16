@@ -36,7 +36,6 @@ int main(int argc, char **argv, char *envp[])
 	pid_t pid;
 	struct utsname machine;
 	FILE *hist;
-	
 /*  int i;
 	for(i=0;envp[i]!=NULL;i++)
 	{
@@ -87,5 +86,6 @@ int main(int argc, char **argv, char *envp[])
 		printPrefix(machine);
 	}
 	printf("\n");
+
 	return 0;
 }
