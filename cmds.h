@@ -22,5 +22,5 @@ void cat(char **args);
 void cd(char *path);
 void history(FILE *histo);
 void makeCmd(char *buffer, char ***args);
-
+void afficherContenuFichier(FILE* file);
 #endif

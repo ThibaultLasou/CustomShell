@@ -19,8 +19,7 @@ void cat(char **args)
 	/* si path == NULL, lire stdin et l'afficher
 	 * sinon afficher le contenu du fichier passé en paramètre
 	 */
-	int i = 1 , j=1;
-	char line[BUF_SIZE];
+	int i = 1;
 	while(args[i] != NULL)
 	{	
 		/* Ouverture du fichier */
@@ -37,9 +36,12 @@ void cat(char **args)
 		else
 		{
 				afficherContenuFichier(fd);
+				/* Fermeture du ficher */
+				fclose(fd);
 		}
 		i++;
 	}
+
 }
 
 void cd(char *path)
