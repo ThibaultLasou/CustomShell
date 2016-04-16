@@ -1,15 +1,14 @@
 CC = gcc
 EXEC = shell
 SRC = main.c cmds.c exec.c
-OBJS = $(SRC:.c=.o)
 
 all: $(EXEC)
 
-shell: $(OBJS)
-	$(CC) -o $@ $^ $(LIB)
+shell: 
+	$(CC) $(SRC) -o $@ $^
 
-%.o: %.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+debug:
+	$(CC) $(SRC) -o $@ $^ -g
 
 clean:
 	rm *.o $(EXEC)
