@@ -62,6 +62,10 @@ int main(int argc, char **argv, char *envp[])
 			{
 				cd(newArgv[1]);
 			}
+			else if(strcmp("cat", newArgv[0]) == 0)
+			{
+				cat(newArgv);
+			}
 			else if(strcmp("exit", newArgv[0]) == 0)
 			{
 				exit(EXIT_SUCCESS);
