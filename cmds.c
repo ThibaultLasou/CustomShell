@@ -15,18 +15,22 @@ void cat(char **args)
 void cd(char *path)
 {
 	char *WD;
+	/* si cd sans arguments positionner dans HOME */
 	if(path == NULL || path[0] == '\0')
 	{
 		chdir(getenv("HOME"));
 	}
+	/* si cd ~ positionner dans HOME */
 	else if(path[0] == '~')
 	{
 		chdir(getenv("HOME"));
+		/* si cd ~/Repertoire positionner dans Repertoire */
 		if(strlen(path) > 2)
 		{
 			cd(&path[2]);
 		}
 	}
+	/* si cd ~/Repertoire1/Repertoire2/...../RepertoireN positionner dans RepertoireN */
 	else
 	{
 		if(chdir(path) == -1)
@@ -34,6 +38,7 @@ void cd(char *path)
 			printf("%s\n", strerror(errno));
 		}
 	}
+	/* Changer la variable d'environnement*/
 	WD = getcwd(NULL, 0);
 	setenv("PWD", WD, 1);
 	free(WD);
@@ -54,6 +59,7 @@ void history(FILE *histo)
 void makeCmd(char *buffer, char ***args)
 {
 	int i, finMot=0, debutMot=0, nbArgs=1, numArg = 0;
+	/* Calculer le nombre d'arguments dans la ligne de commande */
 	for(i=0;buffer[i]!='\n';i++)
 	{
 		if(buffer[i] == ' ')
@@ -61,7 +67,9 @@ void makeCmd(char *buffer, char ***args)
 			nbArgs++;
 		}
 	}
+	/* Allouer nbArgs+1 cases au tableau args */
 	*args = malloc(sizeof(char *)*(nbArgs+1));
+	/* Remplissage du tableau "args" : Parcourir le tableau "buffer" et copier les chaines de carateres séparées par des espaces dans le tableau "args" */
 	do
 	{
 		for(i=debutMot;buffer[i]!='\n';i++)
