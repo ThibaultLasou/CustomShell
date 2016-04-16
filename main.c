@@ -70,6 +70,10 @@ int main(int argc, char **argv, char *envp[])
 			{
 				history(hist);
 			}
+			else if(strcmp("cat", newArgv[0]) == 0)
+			{
+				cat(newArgv);
+			}
  			else
 			{
 				fflush(hist);
