@@ -8,6 +8,9 @@ void makePaths(char ***paths, char *exec)
 
 void execute(char **newArgv)
 {
+	pid_t pid;
+	int res, i;
+	char **paths;
 	pid = fork();
 	switch(pid)
 	{
@@ -16,8 +19,7 @@ void execute(char **newArgv)
 			exit(EXIT_FAILURE);
 			break;
 		case 0 :
-			int i = 0;
-			char **paths;
+			i = 0;
 			do
 			{
 				res = execv(newArgv[0], newArgv);

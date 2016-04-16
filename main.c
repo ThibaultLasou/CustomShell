@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #include "cmds.h"
+#include "exec.h"
 
 /*
  * Affichage de l'invite de commande
