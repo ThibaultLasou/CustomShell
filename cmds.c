@@ -10,18 +10,16 @@ void cat(char **args)
 	/* si path == NULL, lire stdin et l'afficher
 	 * sinon afficher le contenu du fichier passé en paramètre
 	 */
- 	int i = 1;
- 	int nbcarac;
-	char buffer[512];
+ 	int i = 1 , j=1;
+	char line[512];
 	while(args[i] != NULL)
 	{	
-		/* Ouverture du fichier */
-		int fd = open(args[i], O_RDONLY);
-		
+			/* Ouverture du fichier */
+		   FILE *fd = fopen ( args[i], "r" );
 			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
-			if(fd == -1)
+			if(fd == NULL)
 			{
-				printf("cat: %s : Aucun fichier ou dossier de ce type" , args[i]);
+				printf("cat: %s : Aucun fichier ou dossier de ce type \n " , args[i]);
 				//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
 				i++;
 				continue;
@@ -29,18 +27,16 @@ void cat(char **args)
 			/* Sinon afficher le contenu du fichier */
 			else
 			{
-				while((nbcarac = read(fd, buffer, 512)) > 0)
+				 if ( fd != NULL )
 				{
-					write(1, buffer, nbcarac); 
+						  while ( fgets ( line, sizeof line, fd ) != NULL ) /* lire une ligne */
+					{
+						 printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
+						 j++;
+					}
 				}
 			}
-			
-			/* Si erreur lors de la fermeture */
-			if(close(fd) == -1)
-			{
-				fprintf(stderr, "Erreur fermeture %s\n", args[i]);
-			}
-			
+						
 			i++;
 		}
 }
