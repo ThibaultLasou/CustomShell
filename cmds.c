@@ -10,6 +10,39 @@ void cat(char **args)
 	/* si path == NULL, lire stdin et l'afficher
 	 * sinon afficher le contenu du fichier passé en paramètre
 	 */
+ 	int i = 1;
+ 	int nbcarac;
+	char buffer[512];
+	while(args[i] != NULL)
+	{	
+		/* Ouverture du fichier */
+		int fd = open(args[i], O_RDONLY);
+		
+			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
+			if(fd == -1)
+			{
+				printf("cat: %s : Aucun fichier ou dossier de ce type" , args[i]);
+				//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
+				i++;
+				continue;
+			}
+			/* Sinon afficher le contenu du fichier */
+			else
+			{
+				while((nbcarac = read(fd, buffer, 512)) > 0)
+				{
+					write(1, buffer, nbcarac); 
+				}
+			}
+			
+			/* Si erreur lors de la fermeture */
+			if(close(fd) == -1)
+			{
+				fprintf(stderr, "Erreur fermeture %s\n", args[i]);
+			}
+			
+			i++;
+		}
 }
 
 void cd(char *path)
