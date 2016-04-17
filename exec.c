@@ -34,3 +34,59 @@ void execute(char **newArgv)
 			break;
 	}
 }
+
+void launch(FILE* hist, char *buffer)
+{
+	char **newArgv;
+	int newArgc;
+	pid_t pid;
+	newArgc = parser(buffer, &newArgv, ' ');
+	if((newArgv[0])[0] == '!')
+	{
+		int l = atoi(&((newArgv[0])[1]));
+		relaunch(hist, l);
+	}
+	else
+	{
+		fprintf(hist, buffer);
+		if(strcmp("cd", newArgv[0]) == 0)
+		{
+			cd(newArgv[1]);
+		}
+		else if(strcmp("cat", newArgv[0]) == 0)
+		{
+			cat(newArgv, newArgc);
+		}
+		else if(strcmp("exit", newArgv[0]) == 0)
+		{
+			exit(EXIT_SUCCESS);
+		}
+		else if(strcmp("history", newArgv[0]) == 0)
+		{
+			history(hist);
+		}
+		else
+		{
+			fflush(hist);
+			execute(newArgv);
+		}
+	}
+}
+
+void relaunch(FILE *histo, int line)
+{
+	char buffer[BUF_SIZE];
+	int i = 0;
+	fseek(histo, 0, SEEK_SET);
+	while(fgets(buffer, BUF_SIZE, histo) != NULL)
+	{
+		i++;
+		if(i == line)
+		{
+			fseek(histo, 0, SEEK_END);
+			printf("%s\n", buffer);
+			launch(histo, buffer);
+			return;
+		}
+	}
+}

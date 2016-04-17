@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "utilities.h"
+
 /*  Fonction : makePath
  *	Entrées : 
  *			- char ***paths : tableau qui contiendra les différents chemins possibles
@@ -30,4 +32,7 @@ void makePaths(char ***paths, char *exec);
  */
 void execute(char **newArgv);
 
+void launch(FILE* hist, char *buffer);
+
+void relaunch(FILE *histo, int line);
 #endif

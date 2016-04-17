@@ -61,7 +61,6 @@ void afficherContenuFichier(FILE* file, bool num)
 {
 	int j=1;
 	char line[BUF_SIZE];
-	fseek(file, 0, SEEK_SET);// remets le pointeur de lecture au début
 	while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
 	{
 		if(num == true)
@@ -70,6 +69,5 @@ void afficherContenuFichier(FILE* file, bool num)
 			j++;
 		}
 		printf("%s", line); /* ecrire la ligne (avec le numero de la ligne) */
-		j++;
 	}
 }

@@ -31,9 +31,6 @@ int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
 	char *loginName, *histPath;
-	char **newArgv;
-	int newArgc, res;
-	pid_t pid;
 	struct utsname machine;
 	FILE *hist;
 /*  int i;
@@ -55,33 +52,11 @@ int main(int argc, char **argv, char *envp[])
 	{
 		if(buffer[0]!='\n')
 		{
-			fprintf(hist, buffer);
-			newArgc = parser(buffer, &newArgv, ' ');
-			if(strcmp("cd", newArgv[0]) == 0)
-			{
-				cd(newArgv[1]);
-			}
-			else if(strcmp("cat", newArgv[0]) == 0)
-			{
-				cat(newArgv, newArgc);
-			}
-			else if(strcmp("exit", newArgv[0]) == 0)
-			{
-				exit(EXIT_SUCCESS);
-			}
-			else if(strcmp("history", newArgv[0]) == 0)
-			{
-				history(hist);
-			}
- 			else
-			{
-				fflush(hist);
-				execute(newArgv);
-			}
+			launch(hist, buffer);
 		}
 		printPrefix(machine);
 	}
 	printf("\n");
 
 	return 0;
-}
+}	
