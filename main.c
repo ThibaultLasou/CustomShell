@@ -39,7 +39,7 @@ int main(int argc, char **argv, char *envp[])
 		printf("%s\n", envp[i]);
 	}
 */
-
+	setEnvironnement();
 	// Ouverture du fichier d'historique
 	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
 	sprintf(histPath,"%s/.history", getenv("HOME"));

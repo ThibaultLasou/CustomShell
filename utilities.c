@@ -71,3 +71,27 @@ void afficherContenuFichier(FILE* file, bool num)
 		printf("%s", line); /* ecrire la ligne (avec le numero de la ligne) */
 	}
 }
+
+void setEnvironnement()
+{
+	char *tmp;
+	if(getenv("LOGNAME") == NULL)
+	{
+		setenv(getlogin(), "LOGNAME", 0);
+	}
+	if(getenv("HOME") == NULL)
+	{
+		tmp = malloc(sizeof(char)*(strlen("/home/")+strlen(getenv("LOGNAME"))));
+		strcpy(tmp, "/home/");
+		strcat(tmp, getenv("LOGNAME"));
+		setenv(tmp, "HOME", 0);
+		free(tmp);
+	}
+	if(getenv("PWD") == NULL)
+	{
+		tmp = getcwd(NULL, 0);
+		setenv("PWD", tmp, 1);
+		free(tmp);
+	}
+}
+

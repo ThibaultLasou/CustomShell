@@ -1,6 +1,6 @@
 #include "exec.h"
 
-void makePaths(char ***paths, char *exec)
+void makePaths(char **paths, char *exec, char ***finalPaths)
 {
 	/* c'est un peu comme makeCmd */
 }

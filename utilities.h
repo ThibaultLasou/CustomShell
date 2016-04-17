@@ -27,11 +27,20 @@
  *		- char sep : le caractère séparateur
  *	Sorties : le nombre de chaînes obtenues.
  *
- *	Divise une chaîne de caractères en plusieurs chaînes selon un caractère séparateur
- *			
+ *	Divise une chaîne de caractères en plusieurs chaînes selon un caractère
+ *	séparateur
  */
 int parser(char *buffer, char ***elem, char sep);
-void afficherContenuFichier(FILE* file, bool num);
 
+/*  Fonction afficherContenuFichier
+ *	Entrées : 
+ *		- FILE *file : le fichier à afficher.
+ *		- bool num : num de ligne on/off
+ *
+ *	Affiche dans stdout le fichier file. La lecture commence depuis la pos
+ *	actuelle du pointeur de lecture dans le fichier.
+ */
+void afficherContenuFichier(FILE *file, bool num);
 
+void setEnvironnement();
 #endif
