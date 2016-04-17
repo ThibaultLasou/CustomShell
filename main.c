@@ -56,14 +56,14 @@ int main(int argc, char **argv, char *envp[])
 		if(buffer[0]!='\n')
 		{
 			fprintf(hist, buffer);
-			makeCmd(buffer, &newArgv);
+			newArgc = parser(buffer, &newArgv, ' ');
 			if(strcmp("cd", newArgv[0]) == 0)
 			{
 				cd(newArgv[1]);
 			}
 			else if(strcmp("cat", newArgv[0]) == 0)
 			{
-				cat(newArgv);
+				cat(newArgv, newArgc);
 			}
 			else if(strcmp("exit", newArgv[0]) == 0)
 			{
@@ -72,10 +72,6 @@ int main(int argc, char **argv, char *envp[])
 			else if(strcmp("history", newArgv[0]) == 0)
 			{
 				history(hist);
-			}
-			else if(strcmp("cat", newArgv[0]) == 0)
-			{
-				cat(newArgv);
 			}
  			else
 			{

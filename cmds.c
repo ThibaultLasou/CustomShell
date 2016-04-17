@@ -4,40 +4,40 @@ void touch(char **args)
 {
 
 }
-void afficherContenuFichier(FILE* file)
-{
-	int j=1;
-	char line[BUF_SIZE];
-					while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
-				{
-					printf("%d  %s",j, line); /* ecrire la ligne (avec le numero de la ligne) */
-					j++;
-				}
-}
-void cat(char **args)
+
+void cat(char **args, int argc)
 {
 	/* si path == NULL, lire stdin et l'afficher
 	 * sinon afficher le contenu du fichier passé en paramètre
 	 */
 	int i = 1;
-	while(args[i] != NULL)
+	bool num = false;
+	if(strcmp(args[1],"-n") == 0)
+	{
+		num = true;
+		i++;
+	}
+	else if(strcmp(args[argc-1],"-n") == 0)
+	{
+		num = true;
+		argc--;
+	}
+	while(i < argc)
 	{	
 		/* Ouverture du fichier */
-		FILE *fd = fopen ( args[i], "r" );
+		FILE *fd = fopen(args[i], "r" );
 		/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
 		if(fd == NULL)
 		{
 			printf("cat: %s : %s\n " , args[i], strerror(errno));
 			//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
-			i++;
-			continue;
 		}
 		/* Sinon afficher le contenu du fichier */
 		else
 		{
-				afficherContenuFichier(fd);
-				/* Fermeture du ficher */
-				fclose(fd);
+			afficherContenuFichier(fd, num);
+			/* Fermeture du ficher */
+			fclose(fd);
 		}
 		i++;
 	}

@@ -1,6 +1,6 @@
 CC = gcc
 EXEC = shell
-SRC = main.c cmds.c exec.c
+SRC = main.c cmds.c exec.c utilities.c
 
 all: $(EXEC)
 
@@ -11,4 +11,4 @@ debug:
 	$(CC) $(SRC) -o $@ $^ -g
 
 clean:
-	rm *.o $(EXEC)
+	rm $(EXEC) debug

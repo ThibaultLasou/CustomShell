@@ -1,7 +1,23 @@
 #ifndef  UTILITIES_INC
 #define  UTILITIES_INC
 
-#include "cmds.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/utsname.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdbool.h>
+
+
+#define BUF_SIZE 512
 
 /*  Fonction parser
  *	Entrées : 
@@ -15,5 +31,7 @@
  *			
  */
 int parser(char *buffer, char ***elem, char sep);
+void afficherContenuFichier(FILE* file, bool num);
+
 
 #endif

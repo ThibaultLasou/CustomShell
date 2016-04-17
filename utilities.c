@@ -56,3 +56,20 @@ int parser(char *buffer, char ***elem, char sep)
 	(*elem)[numElem] = NULL;
 	return nbElems;
 }
+
+void afficherContenuFichier(FILE* file, bool num)
+{
+	int j=1;
+	char line[BUF_SIZE];
+	fseek(file, 0, SEEK_SET);// remets le pointeur de lecture au début
+	while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
+	{
+		if(num == true)
+		{
+			printf("%d\t", j);
+			j++;
+		}
+		printf("%s", line); /* ecrire la ligne (avec le numero de la ligne) */
+		j++;
+	}
+}
