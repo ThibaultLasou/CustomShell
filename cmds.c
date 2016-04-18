@@ -2,7 +2,49 @@
 
 void touch(char **args)
 {
+	struct stat sb;
+	int i = 1;
+	
+	/* touch avec l'option -d : affichage du dernier accès au fichier ainsi que la dernière modification */
+	if (argc == 3)
+	{
+		/* placer le i en fonction de l'emplacement de l'option -d*/
+		if(strcmp(args[1],"-d") == 0)
+		{
+			i++;
+		}
+		stat(args[i],&sb);
+		printf("Dernier accès au fichier :         %s", ctime(&sb.st_atime));
+		printf("Dernière modification du fichier:  %s", ctime(&sb.st_mtime));
+	}
+	
+	else if(argc ==2)
+	{
+		/* Dans le cas où : touch -d */
+		if(strcmp(args[1],"-d") == 0)
+		{
+			printf("touch: opérande de fichier manquant %s\n ", strerror(errno));			
+		}
+		/* Dans le cas où : touch fichierQuiN'existePas */
+		else if (fopen(args[1],"r")==NULL)
+		{
+			fopen(args[1], "w" ); // creer le fichier 
+		}
 
+		/* Dans le cas où : touch fichierExistant */
+		else
+		{
+			//struct utimbuf t;
+			//t.modtime = time(0);
+			//utime(args[1], &t);
+		}
+		
+	}
+	/* Dans le cas où touch sans arguments */
+	else if(argc == 1 )
+	{
+		printf("touch: opérande de fichier manquant %s\n ", strerror(errno));
+	}
 }
 
 void cat(char **args, int argc)
@@ -78,8 +120,6 @@ void cd(char *path)
 
 void history(FILE *histo)
 {
-	char buffer[BUF_SIZE];
-	int i = 0;
 	fseek(histo, 0, SEEK_SET);
 	afficherContenuFichier(histo, true);
 }

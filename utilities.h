@@ -16,6 +16,8 @@
 #include <fcntl.h>
 #include <stdbool.h>
 
+#include <time.h>
+#include <utime.h>
 
 #define BUF_SIZE 512
 

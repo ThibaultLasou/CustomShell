@@ -65,10 +65,10 @@ void afficherContenuFichier(FILE* file, bool num)
 	{
 		if(num == true)
 		{
-			printf("%d\t", j);
+			printf("%d\t", j);/* afficher le numero de la ligne */
 			j++;
 		}
-		printf("%s", line); /* ecrire la ligne (avec le numero de la ligne) */
+		printf("%s", line); /* ecrire la ligne  */
 	}
 }
 

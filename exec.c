@@ -65,6 +65,10 @@ void launch(FILE* hist, char *buffer)
 		{
 			history(hist);
 		}
+		else if(strcmp("touch", newArgv[0]) == 0)
+		{
+			touch(newArgv ,newArgc);
+		}
 		else
 		{
 			fflush(hist);
