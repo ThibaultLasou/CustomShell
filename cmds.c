@@ -54,19 +54,27 @@ void cat(char **args, int argc)
 	int j = 1;
 	bool num = false;
 	char line[BUF_SIZE];
-	FILE *fd;
+	FILE *fd = NULL;
 	
-	if(strcmp(args[1],"-n") == 0)
+	if(argc>1)
 	{
-		num = true;
-		i++;
+		if(strcmp(args[1],"-n") == 0)
+		{
+			num = true;
+			i++;
+		}
+		else if(strcmp(args[argc-1],"-n") == 0)
+		{
+			num = true;
+			argc--;
+		}
 	}
-	else if(strcmp(args[argc-1],"-n") == 0)
+	if(i == argc)
 	{
-		num = true;
-		argc--;
+		fd = stdin;
+		afficherContenuFichier(fd, num);
+		return;
 	}
-	
 	while(i < argc)
 	{	
 		/* Ouverture du fichier */
