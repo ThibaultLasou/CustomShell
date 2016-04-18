@@ -1,8 +1,9 @@
 #include "cmds.h"
 
-void touch(char **args)
+void touch(char **args , int argc)
 {
 	struct stat sb;
+	struct utimbuf t;
 	int i = 1;
 	
 	/* touch avec l'option -d : affichage du dernier accès au fichier ainsi que la dernière modification */
@@ -23,7 +24,7 @@ void touch(char **args)
 		/* Dans le cas où : touch -d */
 		if(strcmp(args[1],"-d") == 0)
 		{
-			printf("touch: opérande de fichier manquant %s\n ", strerror(errno));			
+			printf("touch: opérande de fichier manquant\n ");			
 		}
 		/* Dans le cas où : touch fichierQuiN'existePas */
 		else if (fopen(args[1],"r")==NULL)
@@ -34,26 +35,27 @@ void touch(char **args)
 		/* Dans le cas où : touch fichierExistant */
 		else
 		{
-			//struct utimbuf t;
-			//t.modtime = time(0);
-			//utime(args[1], &t);
+			t.modtime = time(0);
+			t.actime = time(0);
+			utime(args[1], &t);
 		}
 		
 	}
 	/* Dans le cas où touch sans arguments */
 	else if(argc == 1 )
 	{
-		printf("touch: opérande de fichier manquant %s\n ", strerror(errno));
+		printf("touch: opérande de fichier manquant \n ");
 	}
 }
 
 void cat(char **args, int argc)
 {
-	/* si path == NULL, lire stdin et l'afficher
-	 * sinon afficher le contenu du fichier passé en paramètre
-	 */
 	int i = 1;
+	int j = 1;
 	bool num = false;
+	char line[BUF_SIZE];
+	FILE *fd;
+	
 	if(strcmp(args[1],"-n") == 0)
 	{
 		num = true;
@@ -64,10 +66,11 @@ void cat(char **args, int argc)
 		num = true;
 		argc--;
 	}
+	
 	while(i < argc)
 	{	
 		/* Ouverture du fichier */
-		FILE *fd = fopen(args[i], "r" );
+		fd = fopen(args[i], "r" );
 		/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
 		if(fd == NULL)
 		{
@@ -77,13 +80,20 @@ void cat(char **args, int argc)
 		/* Sinon afficher le contenu du fichier */
 		else
 		{
-			afficherContenuFichier(fd, num);
+			while(fgets(line, BUF_SIZE, fd) != NULL) /* lire une ligne */
+			{
+				if(num == true)
+				{
+					printf("%d\t", j);/* afficher le numero de la ligne */
+					j++;
+				}
+				printf("%s", line); /* ecrire la ligne  */
+			}
 			/* Fermeture du ficher */
 			fclose(fd);
 		}
 		i++;
 	}
-
 }
 
 void cd(char *path)

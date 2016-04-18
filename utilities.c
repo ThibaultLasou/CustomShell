@@ -94,4 +94,3 @@ void setEnvironnement()
 		free(tmp);
 	}
 }
-
