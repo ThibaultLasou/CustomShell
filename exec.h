@@ -21,7 +21,7 @@
  *	
  *	Crée les différents chemins possibles pour exec 
  */
-void makePaths(char **paths, char *exec, char ***finalPaths);
+void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths);
 
 /*  Fonction : execute
  *	Entrées : 

@@ -1,6 +1,6 @@
 #include "cmds.h"
 
-void touch(char **args , int argc)
+void touch(char **args, int argc)
 {
 	struct stat sb;
 	struct utimbuf t;
@@ -10,26 +10,26 @@ void touch(char **args , int argc)
 	if (argc == 3)
 	{
 		/* placer le i en fonction de l'emplacement de l'option -d*/
-		if(strcmp(args[1],"-d") == 0)
+		if(strcmp(args[1], "-d") == 0)
 		{
 			i++;
 		}
 		stat(args[i],&sb);
 		printf("Dernier accès au fichier :         %s", ctime(&sb.st_atime));
-		printf("Dernière modification du fichier:  %s", ctime(&sb.st_mtime));
+		printf("Dernière modification du fichier : %s", ctime(&sb.st_mtime));
 	}
 	
-	else if(argc ==2)
+	else if(argc == 2)
 	{
 		/* Dans le cas où : touch -d */
 		if(strcmp(args[1],"-d") == 0)
 		{
-			printf("touch: opérande de fichier manquant\n ");			
+			printf("touch: opérande de fichier manquant\n");			
 		}
 		/* Dans le cas où : touch fichierQuiN'existePas */
-		else if (fopen(args[1],"r")==NULL)
+		else if(fopen(args[1], "r") == NULL)
 		{
-			fopen(args[1], "w" ); // creer le fichier 
+			fopen(args[1], "w"); // creer le fichier 
 		}
 
 		/* Dans le cas où : touch fichierExistant */
@@ -42,9 +42,9 @@ void touch(char **args , int argc)
 		
 	}
 	/* Dans le cas où touch sans arguments */
-	else if(argc == 1 )
+	else if(argc == 1)
 	{
-		printf("touch: opérande de fichier manquant \n ");
+		printf("touch: opérande de fichier manquant\n");
 	}
 }
 
@@ -83,7 +83,6 @@ void cat(char **args, int argc)
 		if(fd == NULL)
 		{
 			printf("cat: %s : %s\n " , args[i], strerror(errno));
-			//fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", args[i]);
 		}
 		/* Sinon afficher le contenu du fichier */
 		else

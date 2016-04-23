@@ -46,7 +46,7 @@ int main(int argc, char **argv, char *envp[])
 	hist = fopen(histPath,"a+");
 	
 	uname(&machine);
-	
+
 	printPrefix(machine);
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{

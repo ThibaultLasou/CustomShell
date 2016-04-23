@@ -1,6 +1,6 @@
 CC = gcc
 EXEC = shell
-SRC = main.c cmds.c exec.c utilities.c
+SRC = main.c cmds.c exec.c utilities.c copie.c
 
 all: $(EXEC)
 

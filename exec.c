@@ -1,15 +1,26 @@
 #include "exec.h"
 
-void makePaths(char **paths, char *exec, char ***finalPaths)
+void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
 {
-	/* c'est un peu comme makeCmd */
+	int i;
+	*finalPaths = malloc(sizeof(char *)*nbPaths);
+	for(i=0;i<nbPaths;i++)
+	{
+		(*finalPaths)[i] = malloc(sizeof(char)*(strlen(paths[0])+strlen(exec)+1));
+		strcpy((*finalPaths)[i], paths[i]);
+		strcat((*finalPaths)[i], "/");
+		strcat((*finalPaths)[i], exec);
+	}
 }
 
 void execute(char **newArgv)
 {
 	pid_t pid;
-	int res, i;
+	int res, i, nbPaths;
 	char **paths;
+	char **finalPaths;
+	nbPaths = parser(getenv("PATH"), &paths, ':');
+	makePaths(paths, newArgv[0], &finalPaths, nbPaths);
 	pid = fork();
 	switch(pid)
 	{
@@ -23,9 +34,9 @@ void execute(char **newArgv)
 			do // On essaye tous les chemins possibles
 			{
 				res = execv(newArgv[0], newArgv);
-				newArgv[0] = paths[i];
+				newArgv[0] = finalPaths[i];
 				i++;
-			}while(res == -1);
+			}while(res == -1 && i<nbPaths);
 			printf("%s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		default :
@@ -67,7 +78,11 @@ void launch(FILE* hist, char *buffer)
 		}
 		else if(strcmp("touch", newArgv[0]) == 0)
 		{
-			touch(newArgv ,newArgc);
+			touch(newArgv, newArgc);
+		}
+		else if(strcmp("cp", newArgv[0]) == 0)
+		{
+			cp(newArgv, newArgc);
 		}
 		else
 		{
