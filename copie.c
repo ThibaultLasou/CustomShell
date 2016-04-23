@@ -12,14 +12,16 @@
 
 char *makePath(char *dir, char *file) // cree les chemins d'accès corrects
 {
-	char *res = malloc(sizeof(char)*BUFFER_SIZE);
+	char *res;
 	if(dir[strlen(dir)-1] != '/')
 	{
-		sprintf(res, "%s/%s",dir, file);
+		res = malloc(sizeof(char)*(strlen(dir)+strlen(file)+1));
+		sprintf(res, "%s/%s", dir, file);
 	}
 	else
 	{
-		sprintf(res, "%s%s",dir, file);
+		res = malloc(sizeof(char)*(strlen(dir)+strlen(file)));
+		sprintf(res, "%s%s", dir, file);
 	}
 	return res;
 }
@@ -53,15 +55,6 @@ int copieDoDansDo(char *source, char *dest, struct stat statOri)
 	}
 
 	struct stat stbufdir;
-	if(stat(dest, &stbufdir) == -1) // si le dossier de destination est introuvable, alors on le cree
-	{
-		if(mkdir(dest, statOri.st_mode) == -1)
-		{
-			fprintf(stderr, "Impossible de créer le dossier %s\n", dest);
-			return 0;
-		}
-	}
-
 
 	while((d = readdir(dp)) != NULL)
 	{
@@ -120,6 +113,25 @@ int copieFiDansFi(char *ori, char *cpy, struct stat statOri)
 	return 1;
 }
 
+int copieFiDansDo(char *ori, char *cpy, struct stat statOri)
+{
+	int res;
+	char *nomFichier, *cheminCpy;
+	nomFichier = strrchr(ori, (int) '/');
+	
+	if(nomFichier != NULL)
+	{
+		cheminCpy = makePath(cpy, &(nomFichier[1]));
+	}
+	else
+	{
+		cheminCpy = makePath(cpy, ori);
+	}
+	res = copieFiDansFi(ori, cheminCpy, statOri);
+	free(cheminCpy);
+	return res;
+}
+
 int cp(char *argv[], int argc)
 {
 	if(argc < 3)
@@ -133,19 +145,35 @@ int cp(char *argv[], int argc)
 
 	if(stat(argv[1], &statOri) != -1) // on accède au contenu à copier
 	{
-		if(stat(argv[argc-1], &statCpy) != -1) // on vérifie si la cible existe déjà
+		if(S_ISDIR(statOri.st_mode))
 		{
-			if(!S_ISDIR(statCpy.st_mode)) // on vérifie d'abord si ce n'est pas un dossier
+			if(stat(argv[2], &statCpy) == -1)
 			{
-				if(S_ISDIR(statOri.st_mode)) // si le contenu a copier est un dossier, ou plusieurs fichiers
+				if(mkdir(argv[2], statOri.st_mode) == -1)
 				{
-					fprintf(stderr, "Impossible de copier un dossier dans un fichier\n");
+					fprintf(stderr, "Impossible de créer le dossier %s\n", argv[2]);
 					return 0;
 				}
+				copieDoDansDo(argv[1], argv[2], statOri);
+			}
+			else if(S_ISDIR(statCpy.st_mode))
+			{
+				copieDoDansDo(argv[1], argv[2], statOri);
 			}
 			else
 			{
-				
+				fprintf(stderr, "Impossible de copier un dossier dans un fichier\n");
+			}
+		}
+		else
+		{
+			if((stat(argv[2], &statCpy) == -1) || S_ISREG(statCpy.st_mode))
+			{
+				copieFiDansFi(argv[1], argv[2], statOri);
+			}
+			else
+			{
+				copieFiDansDo(argv[1], argv[2], statOri);
 			}
 		}
 	}
@@ -153,24 +181,6 @@ int cp(char *argv[], int argc)
 	{
 		fprintf(stderr, "Impossible d'acceder à %s\n", argv[1]);
 		return 0;
-	}
-
-	else
-	{
-		if(S_ISDIR(statOri.st_mode))
-		{
-			if(copieDoDansDo(argv[1], argv[2], statOri) != 1)
-			{
-				fprintf(stderr,"Erreur lors de la copie (DoDansDo)\n");
-			}
-		}
-		if(S_ISREG(statOri.st_mode))
-		{
-			if(copieFiDansFi(argv[1], argv[2], statOri) != 1)
-			{
-				fprintf(stderr,"Erreur lors de la copie (FiDansFi)\n");
-			}
-		}
 	}
 	return 1;
 }
