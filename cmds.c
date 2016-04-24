@@ -14,11 +14,16 @@ void touch(char **args, int argc)
 		{
 			i++;
 		}
-		stat(args[i],&sb);
-		printf("Dernier accès au fichier :         %s", ctime(&sb.st_atime));
-		printf("Dernière modification du fichier : %s", ctime(&sb.st_mtime));
+		if(stat(args[i],&sb) != -1)
+		{
+			printf("Dernier accès au fichier :         %s", ctime(&sb.st_atime));
+			printf("Dernière modification du fichier : %s", ctime(&sb.st_mtime));
+		}
+		else
+		{
+			printf("touch: %s : %s\n" , args[i], strerror(errno));
+		}
 	}
-	
 	else if(argc == 2)
 	{
 		/* Dans le cas où : touch -d */
@@ -29,17 +34,21 @@ void touch(char **args, int argc)
 		/* Dans le cas où : touch fichierQuiN'existePas */
 		else if(fopen(args[1], "r") == NULL)
 		{
-			fopen(args[1], "w"); // creer le fichier 
+			if(fopen(args[1], "w") == NULL) // creer le fichier 
+			{
+				printf("touch: %s : %s\n" , args[1], strerror(errno));
+			}
 		}
-
 		/* Dans le cas où : touch fichierExistant */
 		else
 		{
 			t.modtime = time(0);
 			t.actime = time(0);
-			utime(args[1], &t);
+			if(utime(args[1], &t) == -1)
+			{
+				printf("touch: %s : %s\n" , args[1], strerror(errno));
+			}
 		}
-		
 	}
 	/* Dans le cas où touch sans arguments */
 	else if(argc == 1)
@@ -54,7 +63,7 @@ void cat(char **args, int argc)
 	int j = 1;
 	bool num = false;
 	char line[BUF_SIZE];
-	FILE *fd = NULL;
+	FILE *file = NULL;
 	
 	if(argc>1)
 	{
@@ -71,23 +80,23 @@ void cat(char **args, int argc)
 	}
 	if(i == argc)
 	{
-		fd = stdin;
-		afficherContenuFichier(fd, num);
+		file = stdin;
+		afficherContenuFichier(file, num);
 		return;
 	}
 	while(i < argc)
 	{	
 		/* Ouverture du fichier */
-		fd = fopen(args[i], "r" );
+		file = fopen(args[i], "r" );
 		/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
-		if(fd == NULL)
+		if(file == NULL)
 		{
-			printf("cat: %s : %s\n " , args[i], strerror(errno));
+			printf("cat: %s : %s\n" , args[i], strerror(errno));
 		}
 		/* Sinon afficher le contenu du fichier */
 		else
 		{
-			while(fgets(line, BUF_SIZE, fd) != NULL) /* lire une ligne */
+			while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
 			{
 				if(num == true)
 				{
@@ -97,7 +106,7 @@ void cat(char **args, int argc)
 				printf("%s", line); /* ecrire la ligne  */
 			}
 			/* Fermeture du ficher */
-			fclose(fd);
+			fclose(file);
 		}
 		i++;
 	}
