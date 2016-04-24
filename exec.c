@@ -65,6 +65,10 @@ void launch(FILE* hist, char *buffer)
 		{
 			cd(newArgv[1]);
 		}
+		else if(strcmp("tail", newArgv[0]) == 0)
+		{
+			tail(newArgv, newArgc);
+		}
 		else if(strcmp("cat", newArgv[0]) == 0)
 		{
 			cat(newArgv, newArgc);
@@ -75,7 +79,7 @@ void launch(FILE* hist, char *buffer)
 		}
 		else if(strcmp("history", newArgv[0]) == 0)
 		{
-			history(hist);
+			history(newArgv[1]);
 		}
 		else if(strcmp("touch", newArgv[0]) == 0)
 		{
