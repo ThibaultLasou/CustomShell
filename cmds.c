@@ -125,17 +125,13 @@ void cd(char *path)
 {
 	char *WD;
 	/* si cd sans arguments positionner dans HOME */
-	if(path == NULL || path[0] == '\0')
+	if(path == NULL)
 	{
-		chdir(getenv("HOME"));
-		setenv("PWD", getenv("HOME"), 1);
+		path = getenv("HOME");
 	}
-	else
+	if(chdir(path) == -1)
 	{
-		if(chdir(path) == -1)
-		{
-			printf("%s\n", strerror(errno));
-		}
+		printf("%s\n", strerror(errno));
 	}
 	/* Changer la variable d'environnement*/
 	WD = getcwd(NULL, 0);
