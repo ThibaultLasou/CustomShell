@@ -86,25 +86,34 @@ void cat(char **args, int argc)
 	}
 	while(i < argc)
 	{	
-		/* Ouverture du fichier */
-		file = fopen(args[i], "r" );
-		/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
-		if(file == NULL)
+		if((args[1] == NULL) || /* cat sans arguments */
+			(num == true && args[2] == NULL) || /* cat -n  */
+			(strcmp(args[i], "-") == 0)) /* f - g */
 		{
-			printf("cat: %s : %s\n" , args[i], strerror(errno));
+			file = stdin;
 		}
-		/* Sinon afficher le contenu du fichier */
 		else
 		{
-			while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
+			/* Ouverture du fichier */
+			file = fopen(args[i], "r" );
+			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
+			if(file == NULL)
 			{
-				if(num == true)
-				{
-					printf("%d\t", j);/* afficher le numero de la ligne */
-					j++;
-				}
-				printf("%s", line); /* ecrire la ligne  */
+				printf("cat: %s : %s\n" , args[i], strerror(errno));
+				return;
 			}
+		}
+		while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
+		{
+			if(num == true)
+			{
+				printf("%d\t", j);/* afficher le numero de la ligne */
+				j++;
+			}
+			printf("%s", line); /* ecrire la ligne  */
+		}
+		if(file != stdin)
+		{
 			/* Fermeture du ficher */
 			fclose(file);
 		}
