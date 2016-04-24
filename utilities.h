@@ -13,13 +13,15 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <stdbool.h>
-
 #include <time.h>
 #include <utime.h>
 
 #define BUF_SIZE 512
+
+extern char *histPath; /* Variable globale, chemin vers le fichier d'historique */
 
 /*  Fonction parser
  *	Entrées : 
@@ -34,17 +36,29 @@
  */
 int parser(char *buffer, char ***elem, char sep);
 
-/*  Fonction afficherContenuFichier
- *	Entrées : 
- *		- FILE *file : le fichier à afficher.
- *		- bool num : num de ligne on/off
+/*  Fonction setEnvironnement
  *
- *	Affiche dans stdout le fichier file. La lecture commence depuis la pos
- *	actuelle du pointeur de lecture dans le fichier.
+ *  S'assure que les variables d'environnement utilisées existent, sinon les initialisent
  */
-void afficherContenuFichier(FILE *file, bool num);
-
 void setEnvironnement();
 
+/*  Fonction replaceTilde
+ *  Entrées
+ *		- char **args : les chaînes de caractères où il faut remplacer ~
+ *
+ *  Remplace les caractères ~ en début de chaîne par le contenu de la variable d'environnement HOME
+ */
 void replaceTilde(char **args);
+
+/*  Fonction histoPath
+ *
+ *  Retourne le chemin du fichier d'historique
+ */
+char *histoPath();
+
+/*  Fonction printPrefix
+ *
+ *  Affiche l'invite de commandes 
+ */
+void printPrefix();
 #endif

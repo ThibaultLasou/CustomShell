@@ -1,23 +1,14 @@
 #ifndef  EXEC_INC
 #define  EXEC_INC
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/utsname.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 #include "utilities.h"
 
-/*  Fonction : makePath
+/*  Fonction : makePaths
  *	Entrées : 
  *			- char **paths : tableau qui contient les différents chemins du path
  *			- char *exec	: nom du programme à lancer
  *			- char ***finalPaths : tableau qui contiendra les différents chemins possibles
+ *			- int nbPaths : taille du tableau paths
  *	
  *	Crée les différents chemins possibles pour exec 
  */
@@ -46,7 +37,7 @@ void launch(FILE* hist, char *buffer);
  *		- FILE *hist : le fichier contenant l'historique
  *		- int line : la ligne de l'historique à exécuter
  *
- * Appelle launch avec la ligne numéro line	
+ * Appelle launch avec la ligne numéro line	de l'historique
  */
 void relaunch(FILE *histo, int line);
 #endif

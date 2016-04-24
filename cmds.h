@@ -3,8 +3,6 @@
 
 #include "utilities.h"
 
-extern char *histPath; /* Variable globale, chemin vers le fichier d'historique */
-
 /*  Fonction touch
  *	Entrées : 
  *		- char **args : tableau d'arguments
@@ -16,7 +14,7 @@ extern char *histPath; /* Variable globale, chemin vers le fichier d'historique 
  */
 void touch(char **args, int argc);
 
-/*  Fonction cat
+/*  Fonction tail 
  *	Entrées : 
  *		- char **args : tableau d'arguments
  *		- int argc : nombre d'arguments

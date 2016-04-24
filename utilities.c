@@ -1,5 +1,7 @@
 #include "utilities.h"
 
+char *histPath = NULL;
+
 int parser(char *buffer, char ***elem, char sep)
 {
 	int i=0, endElem=0, startElem=0, nbElems=0, numElem = 0;
@@ -57,21 +59,6 @@ int parser(char *buffer, char ***elem, char sep)
 	return nbElems;
 }
 
-void afficherContenuFichier(FILE* file, bool num)
-{
-	int j=1;
-	char line[BUF_SIZE];
-	while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
-	{
-		if(num == true)
-		{
-			printf("%d\t", j);/* afficher le numero de la ligne */
-			j++;
-		}
-		printf("%s", line); /* ecrire la ligne  */
-	}
-}
-
 void setEnvironnement()
 {
 	char *tmp;
@@ -116,6 +103,29 @@ void replaceTilde(char **args)
 			free(args[i]);
 			args[i] = temp;
 		}
+	}
+}
+
+// Ouverture du fichier d'historique
+char *histoPath()
+{
+	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
+	sprintf(histPath,"%s/.history", getenv("HOME"));
+	return histPath;
+}
+
+/*
+ * Affichage de l'invite de commande
+ */
+void printPrefix()
+{
+	if(strncmp(getenv("PWD"), getenv("HOME"), strlen(getenv("HOME"))) == 0)
+	{
+		printf("%s@%s:~%s >> ", getenv("LOGNAME"), getenv("HOSTNAME"), getenv("PWD")+strlen(getenv("HOME")));
+	}
+	else
+	{
+		printf("%s@%s:%s >> ", getenv("LOGNAME"), getenv("HOSTNAME"), getenv("PWD"));
 	}
 }
 

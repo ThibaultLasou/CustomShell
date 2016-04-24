@@ -1,7 +1,5 @@
 #include "cmds.h"
 
-char *histPath = NULL;
-
 void touch(char **args, int argc)
 {
 	struct stat sb;
@@ -243,5 +241,6 @@ void history(char *arg)
 		sprintf(args[1],"-n=%s", arg);
 		args[2] = histPath;
 		tail(args, 3);
+		free(args[1]);
 	}
 }

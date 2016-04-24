@@ -38,6 +38,11 @@ void execute(char **newArgv)
 				i++;
 			}while(res == -1 && i<nbPaths);
 			printf("%s\n", strerror(errno));
+			for(i=0;i<nbPaths;i++)
+			{
+				free(paths[i]);
+				free(finalPaths[i]);
+			}
 			exit(EXIT_FAILURE);
 		default :
 			// Processus père
@@ -49,12 +54,12 @@ void execute(char **newArgv)
 void launch(FILE* hist, char *buffer)
 {
 	char **newArgv;
-	int newArgc;
+	int newArgc, l, i;
 	pid_t pid;
 	newArgc = parser(buffer, &newArgv, ' ');
 	if((newArgv[0])[0] == '!')
 	{
-		int l = atoi(&((newArgv[0])[1]));
+		l = atoi(&((newArgv[0])[1]));
 		relaunch(hist, l);
 	}
 	else
@@ -95,6 +100,11 @@ void launch(FILE* hist, char *buffer)
 			execute(newArgv);
 		}
 	}
+	for(i=0;i<newArgc;i++)
+	{
+		free(newArgv[i]);
+	}
+	free(newArgv);
 }
 
 void relaunch(FILE *histo, int line)
