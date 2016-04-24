@@ -78,13 +78,7 @@ void cat(char **args, int argc)
 			argc--;
 		}
 	}
-	if(i == argc)
-	{
-		file = stdin;
-		afficherContenuFichier(file, num);
-		return;
-	}
-	while(i < argc)
+	do
 	{	
 		if((args[1] == NULL) || /* cat sans arguments */
 			(num == true && args[2] == NULL) || /* cat -n  */
@@ -118,7 +112,7 @@ void cat(char **args, int argc)
 			fclose(file);
 		}
 		i++;
-	}
+	}while(i < argc);
 }
 
 void cd(char *path)
