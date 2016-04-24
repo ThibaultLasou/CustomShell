@@ -128,18 +128,8 @@ void cd(char *path)
 	if(path == NULL || path[0] == '\0')
 	{
 		chdir(getenv("HOME"));
+		setenv("PWD", getenv("HOME"), 1);
 	}
-	/* si cd ~ positionner dans HOME */
-	else if(path[0] == '~')
-	{
-		chdir(getenv("HOME"));
-		/* si cd ~/Repertoire positionner dans Repertoire */
-		if(strlen(path) > 2)
-		{
-			cd(&path[2]);
-		}
-	}
-	/* si cd ~/Repertoire1/Repertoire2/...../RepertoireN positionner dans RepertoireN */
 	else
 	{
 		if(chdir(path) == -1)

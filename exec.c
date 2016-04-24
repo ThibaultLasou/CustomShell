@@ -60,6 +60,7 @@ void launch(FILE* hist, char *buffer)
 	else
 	{
 		fprintf(hist, buffer);
+		replaceTilde(newArgv);
 		if(strcmp("cd", newArgv[0]) == 0)
 		{
 			cd(newArgv[1]);

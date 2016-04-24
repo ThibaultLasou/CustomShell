@@ -81,7 +81,7 @@ void setEnvironnement()
 	}
 	if(getenv("HOME") == NULL)
 	{
-		tmp = malloc(sizeof(char)*(strlen("/home/")+strlen(getenv("LOGNAME"))));
+		tmp = malloc(sizeof(char)*(strlen("/home/")+strlen(getenv("LOGNAME")+1)));
 		strcpy(tmp, "/home/");
 		strcat(tmp, getenv("LOGNAME"));
 		setenv(tmp, "HOME", 0);
@@ -94,3 +94,21 @@ void setEnvironnement()
 		free(tmp);
 	}
 }
+
+void replaceTilde(char **args)
+{
+	char *temp;
+	int i;
+	for(i=0;args[i] != NULL;i++)
+	{
+		if((args[i])[0] == '~')
+		{
+			temp = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen(args[i])));
+			strcpy(temp, getenv("HOME"));
+			strcat(temp, &(args[i][1]));
+			free(args[i]);
+			args[i] = temp;
+		}
+	}
+}
+

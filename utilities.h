@@ -45,4 +45,6 @@ int parser(char *buffer, char ***elem, char sep);
 void afficherContenuFichier(FILE *file, bool num);
 
 void setEnvironnement();
+
+void replaceTilde(char **args);
 #endif
