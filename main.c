@@ -11,18 +11,25 @@
 #include "cmds.h"
 #include "exec.h"
 
+char *histoPath()
+{
+	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
+	sprintf(histPath,"%s/.history", getenv("HOME"));
+	return histPath;
+}
+	// Ouverture du fichier d'historique
 /*
  * Affichage de l'invite de commande
  */
-void printPrefix(struct utsname machine)
+void printPrefix()
 {
 	if(strncmp(getenv("PWD"), getenv("HOME"), strlen(getenv("HOME"))) == 0)
 	{
-		printf("%s@%s:~%s >> ", getenv("LOGNAME"), machine.nodename, getenv("PWD")+strlen(getenv("HOME")));
+		printf("%s@%s:~%s >> ", getenv("LOGNAME"), getenv("HOSTNAME"), getenv("PWD")+strlen(getenv("HOME")));
 	}
 	else
 	{
-		printf("%s@%s:%s >> ", getenv("LOGNAME"), machine.nodename, getenv("PWD"));
+		printf("%s@%s:%s >> ", getenv("LOGNAME"), getenv("HOSTNAME"), getenv("PWD"));
 	}
 }
 /*
@@ -30,31 +37,24 @@ void printPrefix(struct utsname machine)
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
-	char *loginName, *histPath;
-	struct utsname machine;
 	FILE *hist;
 /*  int i;
 	for(i=0;envp[i]!=NULL;i++)
 	{
 		printf("%s\n", envp[i]);
-	}
+		}
 */
 	setEnvironnement();
-	// Ouverture du fichier d'historique
-	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
-	sprintf(histPath,"%s/.history", getenv("HOME"));
+	histPath = histoPath();
 	hist = fopen(histPath,"a+");
-	
-	uname(&machine);
-
-	printPrefix(machine);
+	printPrefix();
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{
 		if(buffer[0]!='\n')
 		{
 			launch(hist, buffer);
 		}
-		printPrefix(machine);
+		printPrefix();
 	}
 	printf("\n");
 

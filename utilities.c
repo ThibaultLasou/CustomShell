@@ -75,6 +75,8 @@ void afficherContenuFichier(FILE* file, bool num)
 void setEnvironnement()
 {
 	char *tmp;
+	struct utsname machine;
+	
 	if(getenv("LOGNAME") == NULL)
 	{
 		setenv(getlogin(), "LOGNAME", 0);
@@ -92,6 +94,11 @@ void setEnvironnement()
 		tmp = getcwd(NULL, 0);
 		setenv("PWD", tmp, 1);
 		free(tmp);
+	}
+	if(getenv("HOSTNAME") == NULL)
+	{
+		uname(&machine);
+		setenv("HOSTNAME", machine.nodename, 1);
 	}
 }
 

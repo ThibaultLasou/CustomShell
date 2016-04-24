@@ -1,5 +1,7 @@
 #include "cmds.h"
 
+char *histPath = NULL;
+
 void touch(char **args, int argc)
 {
 	struct stat sb;
@@ -135,6 +137,9 @@ void cd(char *path)
 
 void history(FILE *histo)
 {
-	fseek(histo, 0, SEEK_SET);
-	afficherContenuFichier(histo, true);
+	char *args[3];
+	args[0] = "cat";
+	args[1] = "-n";
+	args[2] = histPath;
+	cat(args, 3);
 }

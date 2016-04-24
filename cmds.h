@@ -2,6 +2,9 @@
 #define  CMDS_INC
 
 #include "utilities.h"
+
+extern char *histPath; /* Variable globale, chemin vers le fichier d'historique */
+
 /*  Fonction touch
  *	Entrées : 
  *		- char **args : tableau d'arguments
