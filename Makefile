@@ -12,7 +12,7 @@ debug: $(OBJS)
 	$(CC) -o $(EXEC)Debug $^ -g
 
 %.o : %.c
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< -g
 
 clean:
-	rm $(EXEC) debug
+	rm $(EXEC) $(EXEC)Debug *.o
