@@ -128,4 +128,3 @@ void printPrefix()
 		printf("%s@%s:%s >> ", getenv("LOGNAME"), getenv("HOSTNAME"), getenv("PWD"));
 	}
 }
-

@@ -25,7 +25,7 @@ void execute(char **newArgv)
 	switch(pid)
 	{
 		case -1 :
-			printf("Erreur de forkation\n");
+			fprintf(stderr, "Erreur de forkation\n");
 			exit(EXIT_FAILURE);
 			break;
 		case 0 :
@@ -37,7 +37,7 @@ void execute(char **newArgv)
 				newArgv[0] = finalPaths[i];
 				i++;
 			}while(res == -1 && i<nbPaths);
-			printf("%s\n", strerror(errno));
+			fprintf(stderr, "%s\n", strerror(errno));
 			for(i=0;i<nbPaths;i++)
 			{
 				free(paths[i]);

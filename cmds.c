@@ -21,7 +21,7 @@ void touch(char **args, int argc)
 		}
 		else
 		{
-			printf("touch: %s : %s\n" , args[i], strerror(errno));
+			fprintf(stderr, "touch: %s : %s\n" , args[i], strerror(errno));
 		}
 	}
 	else if(argc == 2)
@@ -29,14 +29,14 @@ void touch(char **args, int argc)
 		/* Dans le cas où : touch -d */
 		if(strcmp(args[1],"-d") == 0)
 		{
-			printf("touch: opérande de fichier manquant\n");			
+			fprintf(stderr, "touch: opérande de fichier manquant\n");			
 		}
 		/* Dans le cas où : touch fichierQuiN'existePas */
 		else if(fopen(args[1], "r") == NULL)
 		{
 			if(fopen(args[1], "w") == NULL) // creer le fichier 
 			{
-				printf("touch: %s : %s\n" , args[1], strerror(errno));
+				fprintf(stderr, "touch: %s : %s\n" , args[1], strerror(errno));
 			}
 		}
 		/* Dans le cas où : touch fichierExistant */
@@ -46,14 +46,14 @@ void touch(char **args, int argc)
 			t.actime = time(0);
 			if(utime(args[1], &t) == -1)
 			{
-				printf("touch: %s : %s\n" , args[1], strerror(errno));
+				fprintf(stderr, "touch: %s : %s\n" , args[1], strerror(errno));
 			}
 		}
 	}
 	/* Dans le cas où touch sans arguments */
 	else if(argc == 1)
 	{
-		printf("touch: opérande de fichier manquant\n");
+		fprintf(stderr, "touch: opérande de fichier manquant\n");
 	}
 }
 
@@ -96,7 +96,7 @@ void tail(char **args, int argc)
 			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
 			if(file == NULL)
 			{
-				printf("tail: %s : %s\n" , args[i], strerror(errno));
+				fprintf(stderr, "tail: %s : %s\n" , args[i], strerror(errno));
 				return;
 			}
 		}
@@ -131,7 +131,6 @@ void tail(char **args, int argc)
 			num = 1;
 		}
 		fseek(file, -(sum*sizeof(char)), SEEK_END);
-		//printf("\n%s\n", args[i]);
 		while(fgets(line, BUF_SIZE, file) != NULL) /* lire une ligne */
 		{
 			printf("%d\t%s", num, line);
@@ -183,7 +182,7 @@ void cat(char **args, int argc)
 			/* Si ce n'est pas un fichier ou erreur lors de l'ouverture*/
 			if(file == NULL)
 			{
-				printf("cat: %s : %s\n" , args[i], strerror(errno));
+				fprintf(stderr, "cat: %s : %s\n" , args[i], strerror(errno));
 				return;
 			}
 		}
@@ -215,7 +214,7 @@ void cd(char *path)
 	}
 	if(chdir(path) == -1)
 	{
-		printf("%s\n", strerror(errno));
+		fprintf(stderr, "%s\n", strerror(errno));
 	}
 	/* Changer la variable d'environnement*/
 	WD = getcwd(NULL, 0);
