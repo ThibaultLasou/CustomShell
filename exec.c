@@ -30,18 +30,18 @@ void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOut
 			break;
 		case 0 :
 			// Processus fils
-			printf("piped : %d, place : %d\n", piped, place);
+			fprintf(stderr,"piped : %d, place : %d\n", piped, place);
 			if(piped == true)
 			{
 				if(place != LAST)
 				{
-					printf("Fermeture read sortie et stdout = write sortie\n");
+					fprintf(stderr, "Fermeture read sortie et stdout = write sortie\n");
 					close(pipeOutfd[0]);
 					dup2(pipeOutfd[1], STDOUT_FILENO);
 				}
 				if(place != FIRST)
 				{
-					printf("Fermeture write entrée et stdin = read entrée\n");
+					fprintf(stderr, "Fermeture write entrée et stdin = read entrée \n");
 					close(pipeInfd[1]);
 					dup2(pipeInfd[0], STDIN_FILENO);
 				}
@@ -66,7 +66,9 @@ void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOut
 				close(pipeOutfd[1]);
 			}
 			// Processus père
+			fprintf(stderr,"%d\n", pid);
 			waitpid(pid, NULL, 0);
+			fprintf(stderr,"%d fini\n", pid);
 			break;
 	}
 }
@@ -148,7 +150,7 @@ void relaunch(FILE *histo, int line)
 void setPipe(FILE* hist, char *buffer)
 {
 	int nbRedir, nbPipes, redirFile, i;
-	char **redir, **pipes, **redirPath, *pipeBuffer[BUF_SIZE];
+	char **redir, **pipes, **redirPath, pipeBuffer;
 	int pipeInfd[2];
 	int pipeOutfd[2];
 	int place = FIRST;
@@ -160,7 +162,7 @@ void setPipe(FILE* hist, char *buffer)
 	if(nbPipes > 1 || nbRedir > 1)
 	{
 		piped = true;
-		printf("Piped\n");
+		fprintf(stderr,"Piped\n");
 	}
 	for(i=0;i<nbPipes;i++)
 	{
@@ -170,25 +172,28 @@ void setPipe(FILE* hist, char *buffer)
 			defStdout = dup(STDOUT_FILENO);
 			if(i != 0)
 			{
-				printf("Ouverture nouveau pipe entrée\n");
+				fprintf(stderr,"Ouverture nouveau pipe entrée\n");
 				pipe(pipeInfd);
-				printf("Transfert\n");
-				while(read(pipeOutfd[0], pipeBuffer, BUF_SIZE)>0)
+				fprintf(stderr,"Transfert\n");
+				while(read(pipeOutfd[0], &pipeBuffer, 1)>0)
 				{
-					write(pipeInfd[1], pipeBuffer, BUF_SIZE);
+					printf("%c", pipeBuffer);
+					write(pipeInfd[1], &pipeBuffer, 1);
 				}
+				printf("\n");
 				close(pipeInfd[1]);
 				close(pipeOutfd[0]);
 			}
 			if(i != nbPipes -1)
 			{
 				pipe(pipeOutfd);
-				printf("Ouverture nouveau pipe sortie\n");
+				fprintf(stderr,"Ouverture nouveau pipe sortie\n");
 			}
 			else if(nbRedir > 1)
 			{
 				parser(redir[1], &redirPath, ARGU_SEP);
 				redirFile = creat(redirPath[0], S_IRWXU);
+				dup2(redirFile, STDOUT_FILENO);
 			}
 			else
 			{
@@ -207,12 +212,14 @@ void setPipe(FILE* hist, char *buffer)
 			{
 				place = MID;
 			}
-			printf("%d\n", place);
+			fprintf(stderr,"%d\n", place);
 		}
 		launch(hist, pipes[i], piped, place, pipeInfd, pipeOutfd);
 	}
 	if(piped == true)
 	{
 		dup2(defStdin, STDIN_FILENO);
+		dup2(defStdout, STDOUT_FILENO);
+		close(redirFile);
 	}
 }
