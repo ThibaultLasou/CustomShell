@@ -20,6 +20,9 @@
 #include <utime.h>
 
 #define BUF_SIZE 512
+#define ARGU_SEP ' '
+#define REDI_SEP '>'
+#define PIPE_SEP '|'
 
 extern char *histPath; /* Variable globale, chemin vers le fichier d'historique */
 

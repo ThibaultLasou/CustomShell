@@ -23,7 +23,7 @@ int main(int argc, char **argv, char *envp[])
 	{
 		if(buffer[0]!='\n')
 		{
-			launch(hist, buffer);
+			setPipe(hist, buffer);
 		}
 		printPrefix();
 	}

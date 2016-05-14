@@ -3,6 +3,8 @@
 
 #include "utilities.h"
 
+enum {FIRST = 0, MID, LAST};
+
 /*  Fonction : makePaths
  *	Entrées : 
  *			- char **paths : tableau qui contient les différents chemins du path
@@ -21,7 +23,7 @@ void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths);
  *	Crée un nouveau processus et exécute le programme passé dans la case 0 du tableau 
  *	avec les arguments dans les autres cases.
  */
-void execute(char **newArgv);
+void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOutfd[2]);
 
 /*  Fontion launch
  *	Entrées :
@@ -30,7 +32,7 @@ void execute(char **newArgv);
  *
  *	Parse la chaîne entrée selon ' ' et détermine si al commande entrée est une commande interne, sinon essaye d'exécuter un fichier à ce nom
  */
-void launch(FILE* hist, char *buffer);
+void launch(FILE* hist, char *buffer, bool piped, int place, int pipeInfd[2], int pipeOutfd[2]);
 
 /*  Fontion relaunch
  *	Entrées :
@@ -40,4 +42,6 @@ void launch(FILE* hist, char *buffer);
  * Appelle launch avec la ligne numéro line	de l'historique
  */
 void relaunch(FILE *histo, int line);
+
+void setPipe(FILE* hist, char *buffer);
 #endif

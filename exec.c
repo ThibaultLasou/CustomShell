@@ -13,7 +13,7 @@ void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
 	}
 }
 
-void execute(char **newArgv)
+void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOutfd[2])
 {
 	pid_t pid;
 	int res, i, nbPaths;
@@ -30,6 +30,22 @@ void execute(char **newArgv)
 			break;
 		case 0 :
 			// Processus fils
+			printf("piped : %d, place : %d\n", piped, place);
+			if(piped == true)
+			{
+				if(place != LAST)
+				{
+					printf("Fermeture read sortie et stdout = write sortie\n");
+					close(pipeOutfd[0]);
+					dup2(pipeOutfd[1], STDOUT_FILENO);
+				}
+				if(place != FIRST)
+				{
+					printf("Fermeture write entrée et stdin = read entrée\n");
+					close(pipeInfd[1]);
+					dup2(pipeInfd[0], STDIN_FILENO);
+				}
+			}
 			i = 0;
 			do // On essaye tous les chemins possibles
 			{
@@ -45,18 +61,22 @@ void execute(char **newArgv)
 			}
 			exit(EXIT_FAILURE);
 		default :
+			if(piped == true)
+			{
+				close(pipeOutfd[1]);
+			}
 			// Processus père
 			waitpid(pid, NULL, 0);
 			break;
 	}
 }
 
-void launch(FILE* hist, char *buffer)
+void launch(FILE* hist, char *buffer, bool piped, int place, int pipeInfd[2], int pipeOutfd[2])
 {
 	char **newArgv;
 	int newArgc, l, i;
 	pid_t pid;
-	newArgc = parser(buffer, &newArgv, ' ');
+	newArgc = parser(buffer, &newArgv, ARGU_SEP);
 	if((newArgv[0])[0] == '!')
 	{
 		l = atoi(&((newArgv[0])[1]));
@@ -97,7 +117,7 @@ void launch(FILE* hist, char *buffer)
 		else
 		{
 			fflush(hist);
-			execute(newArgv);
+			execute(newArgv, piped, place, pipeInfd, pipeOutfd);
 		}
 	}
 	for(i=0;i<newArgc;i++)
@@ -119,8 +139,80 @@ void relaunch(FILE *histo, int line)
 		{
 			fseek(histo, 0, SEEK_END);
 			printf("%s\n", buffer);
-			launch(histo, buffer);
+			setPipe(histo, buffer);
 			return;
 		}
+	}
+}
+
+void setPipe(FILE* hist, char *buffer)
+{
+	int nbRedir, nbPipes, redirFile, i;
+	char **redir, **pipes, **redirPath, *pipeBuffer[BUF_SIZE];
+	int pipeInfd[2];
+	int pipeOutfd[2];
+	int place = FIRST;
+	int defStdin, defStdout;
+	bool piped = false;
+
+	nbRedir = parser(buffer, &redir, REDI_SEP);
+	nbPipes = parser(redir[0], &pipes, PIPE_SEP);
+	if(nbPipes > 1 || nbRedir > 1)
+	{
+		piped = true;
+		printf("Piped\n");
+	}
+	for(i=0;i<nbPipes;i++)
+	{
+		if(piped == true)
+		{
+			defStdin = dup(STDIN_FILENO);
+			defStdout = dup(STDOUT_FILENO);
+			if(i != 0)
+			{
+				printf("Ouverture nouveau pipe entrée\n");
+				pipe(pipeInfd);
+				printf("Transfert\n");
+				while(read(pipeOutfd[0], pipeBuffer, BUF_SIZE)>0)
+				{
+					write(pipeInfd[1], pipeBuffer, BUF_SIZE);
+				}
+				close(pipeInfd[1]);
+				close(pipeOutfd[0]);
+			}
+			if(i != nbPipes -1)
+			{
+				pipe(pipeOutfd);
+				printf("Ouverture nouveau pipe sortie\n");
+			}
+			else if(nbRedir > 1)
+			{
+				parser(redir[1], &redirPath, ARGU_SEP);
+				redirFile = creat(redirPath[0], S_IRWXU);
+			}
+			else
+			{
+				printf("Re stdout\n");
+				dup2(defStdout, STDOUT_FILENO);
+			}
+			if(i == 0)
+			{
+				place = FIRST;
+			}
+			else if(i == nbPipes - 1)
+			{
+				place = LAST;
+			}
+			else
+			{
+				place = MID;
+			}
+			printf("%d\n", place);
+		}
+		launch(hist, pipes[i], piped, place, pipeInfd, pipeOutfd);
+	}
+	if(piped == true)
+	{
+		dup2(defStdin, STDIN_FILENO);
 	}
 }
