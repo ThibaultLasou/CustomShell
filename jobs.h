@@ -1,12 +1,14 @@
 #ifndef  JOBS_INC
 #define  JOBS_INC
 
+#include "signal.h"
 #define MAX_JOB 15
 
 enum {RUNNING, STOPPED};
 
 extern t_job jobsList[MAX_JOB];
 extern int nbJobs;
+extern int fgJob;
 
 typedef struct job t_job;
 

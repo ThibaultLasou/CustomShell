@@ -1,8 +1,12 @@
 #include "jobs.h"
 
-void fg(pid_t pid)
+void fg(int id)
 {
-	
+	if(id < nbJobs)
+	{
+	fgJob = 		
+
+	}
 }
 
 void jobs()
@@ -25,22 +29,36 @@ void jobs()
 
 void initSigHandle()
 {
-	struct sigaction int_handler;
-	int_handler.sa_handler=handle_int};
-	int_handler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
-	sigaction(SIGINT, &int_handler,0);
+	// SIGINT : Ctrl+C
+	struct sigaction interHandler;
+	interHandler.sa_handler = interruptHandler;
+	interHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
+	sigaction(SIGINT, &interHandler, 0);
+
+	// SIGTSTP : Ctrl+Z
+	struct sigaction stopHandler;
+	stopHandler.sa_handler = stopHandler;
+	stopHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
+	sigaction(SIGTSTP, &stopHandler, 0);
+
+	// SIGCHLD
+	struct sigaction chldHandler;
+	chldHandler.sa_handler = childHandler;
+	chldHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
+	sigaction(SIGCHLD, &childHandler, 0);
 }
 
-void handle_int(int num)
+void interruptHandler(int num)
 {
-	uint8_t hasKilled = 0;
-	if(hasCurrentChildID)
+	if(fgJob != -1)
 	{
-		kill(childID[currentChildID].pid, SIGINT);
-		hasKilled = 1;
+		kill(jobsList[fgJob].pid, SIGINT);
 	}
-
-	if(!hasKilled)
-		interrupt=1;
+	else
+	{
+		exit(EXIT_SUCCESS); // à voir
+	}
 	printf("\n");
 }
+
+

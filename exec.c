@@ -13,7 +13,7 @@ void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
 	}
 }
 
-void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOutfd[2])
+void execute(char **newArgv, struct pipeInfo pi)
 {
 	pid_t pid;
 	int res, i, nbPaths;
@@ -30,17 +30,17 @@ void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOut
 			break;
 		case 0 :
 			// Processus fils
-			if(piped == true)
+			if(pi.piped == true)
 			{
-				if(place != LAST)
+				if(pi.place != LAST)
 				{
-					close(pipeOutfd[0]);
-					dup2(pipeOutfd[1], STDOUT_FILENO);
+					close(pi.pipeOutfd[0]);
+					dup2(pi.pipeOutfd[1], STDOUT_FILENO);
 				}
-				if(place != FIRST)
+				if(pi.place != FIRST)
 				{
-					close(pipeInfd[1]);
-					dup2(pipeInfd[0], STDIN_FILENO);
+					close(pi.pipeInfd[1]);
+					dup2(pi.pipeInfd[0], STDIN_FILENO);
 				}
 			}
 			i = 0;
@@ -58,16 +58,16 @@ void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOut
 			exit(EXIT_FAILURE);
 		default :
 			// Processus père
-			if(piped == true)
+			if(pi.piped == true)
 			{
-				close(pipeOutfd[1]);
+				close(pi.pipeOutfd[1]);
 			}
 			waitpid(pid, NULL, 0);
 			break;
 	}
 }
 
-void launch(FILE* hist, char *buffer, bool piped, int place, int pipeInfd[2], int pipeOutfd[2])
+void launch(FILE* hist, char *buffer, struct pipeInfo pi)
 {
 	char **newArgv;
 	int newArgc, l, i;
@@ -113,7 +113,7 @@ void launch(FILE* hist, char *buffer, bool piped, int place, int pipeInfd[2], in
 		else
 		{
 			fflush(hist);
-			execute(newArgv, piped, place, pipeInfd, pipeOutfd);
+			execute(newArgv, pi);
 		}
 	}
 	for(i=0;i<newArgc;i++)
@@ -145,39 +145,36 @@ void setPipe(FILE* hist, char *buffer)
 {
 	int nbRedir, nbPipes, redirFile, i;
 	char **redir, **pipes, **redirPath, pipeBuffer;
-	int pipeInfd[2]; //pipe père->fils
-	int pipeOutfd[2]; //pipe fils->père
-	int place = FIRST;
+	struct pipeInfo pi;
 	int defStdin, defStdout;
-	bool piped = false;
 
 	nbRedir = parser(buffer, &redir, REDI_SEP);
 	nbPipes = parser(redir[0], &pipes, PIPE_SEP);
 	if(nbPipes > 1 || nbRedir > 1)
 	{
-		piped = true;
+		pi.piped = true;
 	}
 	for(i=0;i<nbPipes;i++)
 	{
-		if(piped == true)
+		if(pi.piped == true)
 		{
 			//on garde une copie des flux standards
 			defStdin = dup(STDIN_FILENO);
 			defStdout = dup(STDOUT_FILENO);
 			if(i != 0) // si ce n'est pas la première commande, on doit récupérer les résultats des programmes précédents
 			{
-				pipe(pipeInfd);
-				while(read(pipeOutfd[0], &pipeBuffer, 1)>0)
+				pipe(pi.pipeInfd);
+				while(read(pi.pipeOutfd[0], &pipeBuffer, 1)>0)
 				{
-					write(pipeInfd[1], &pipeBuffer, 1);// on transfert les résultats précédents dans le nouveau pipe pour parler au fils suivant
+					write(pi.pipeInfd[1], &pipeBuffer, 1);// on transfert les résultats précédents dans le nouveau pipe pour parler au fils suivant
 				}
 				// on ferme les entrées de pipe dont on n'a plus besoin
-				close(pipeInfd[1]);
-				close(pipeOutfd[0]);
+				close(pi.pipeInfd[1]);
+				close(pi.pipeOutfd[0]);
 			}
 			if(i != nbPipes -1)
 			{
-				pipe(pipeOutfd); //on ouvre le nouveau pipe de résultat
+				pipe(pi.pipeOutfd); //on ouvre le nouveau pipe de résultat
 			}
 			//si c'est la dernière partie de la commande
 			else if(nbRedir > 1) // redirection dans un fichier
@@ -192,20 +189,20 @@ void setPipe(FILE* hist, char *buffer)
 			}
 			if(i == 0)
 			{
-				place = FIRST;
+				pi.place = FIRST;
 			}
 			else if(i == nbPipes - 1)
 			{
-				place = LAST;
+				pi.place = LAST;
 			}
 			else
 			{
-				place = MID;
+				pi.place = MID;
 			}
 		}
-		launch(hist, pipes[i], piped, place, pipeInfd, pipeOutfd);
+		launch(hist, pipes[i], pi);
 	}
-	if(piped == true) // on remet les flux standards
+	if(pi.piped == true) // on remet les flux standards
 	{
 		dup2(defStdin, STDIN_FILENO);
 		dup2(defStdout, STDOUT_FILENO);

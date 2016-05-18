@@ -3,6 +3,14 @@
 
 #include "utilities.h"
 
+struct pipeInfo
+{
+	bool piped;
+	int pipeInfd[2]; // pipe père->fils
+	int pipeOutfd[2]; // pipe fils->père
+	int place;
+};
+
 enum {FIRST = 0, MID, LAST};
 
 /*  Fonction : makePaths
@@ -27,7 +35,7 @@ void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths);
  *	Crée un nouveau processus et exécute le programme passé dans la case 0 du tableau 
  *	avec les arguments dans les autres cases.
  */
-void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOutfd[2]);
+void execute(char **newArgv, struct pipeInfo pi);
 
 /*  Fontion launch
  *	Entrées :
@@ -40,7 +48,7 @@ void execute(char **newArgv, bool piped, int place, int pipeInfd[2], int pipeOut
  *
  *	Parse la chaîne entrée selon ARGU_SEP et détermine si la commande entrée est une commande interne, sinon essaye d'exécuter un fichier à ce nom
  */
-void launch(FILE* hist, char *buffer, bool piped, int place, int pipeInfd[2], int pipeOutfd[2]);
+void launch(FILE* hist, char *buffer, struct pipeInfo pi);
 
 /*  Fontion relaunch
  *	Entrées :
