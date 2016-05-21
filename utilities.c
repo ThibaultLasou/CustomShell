@@ -1,6 +1,6 @@
 #include "utilities.h"
 
-char *histPath = NULL;
+char cmdsPath[4][PATH_MAX];
 
 int parser(char *buffer, char ***elem, char sep)
 {
@@ -104,14 +104,6 @@ void replaceTilde(char **args)
 			args[i] = temp;
 		}
 	}
-}
-
-// Ouverture du fichier d'historique
-char *histoPath()
-{
-	histPath = malloc(sizeof(char)*(strlen(getenv("HOME"))+strlen("/.history")+1));
-	sprintf(histPath,"%s/.history", getenv("HOME"));
-	return histPath;
 }
 
 /*

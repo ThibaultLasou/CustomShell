@@ -4,8 +4,7 @@ void fg(int id)
 {
 	if(id < nbJobs)
 	{
-	fgJob = 		
-
+		fgJob = 		
 	}
 }
 
@@ -61,4 +60,7 @@ void interruptHandler(int num)
 	printf("\n");
 }
 
-
+void stopHandler(int num)
+{
+	
+}

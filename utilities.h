@@ -18,13 +18,17 @@
 #include <stdbool.h>
 #include <time.h>
 #include <utime.h>
+#include <limits.h>
 
 #define BUF_SIZE 512
 #define ARGU_SEP ' '
 #define REDI_SEP '>'
+#define PATH_SEP ':'
 #define PIPE_SEP '|'
 
-extern char *histPath; /* Variable globale, chemin vers le fichier d'historique */
+enum {HISTORY, CAT, TOUCH, TAIL};
+
+extern char cmdsPath[4][PATH_MAX]; /* Variable globale, chemin vers les commandes */
 
 /*  Fonction parser
  *	Entrées : 
@@ -52,12 +56,6 @@ void setEnvironnement();
  *  Remplace les caractères ~ en début de chaîne par le contenu de la variable d'environnement HOME
  */
 void replaceTilde(char **args);
-
-/*  Fonction histoPath
- *
- *  Retourne le chemin du fichier d'historique
- */
-char *histoPath();
 
 /*  Fonction printPrefix
  *

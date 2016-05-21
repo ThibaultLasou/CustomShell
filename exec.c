@@ -19,8 +19,24 @@ void execute(char **newArgv, struct pipeInfo pi)
 	int res, i, nbPaths;
 	char **paths;
 	char **finalPaths;
-	nbPaths = parser(getenv("PATH"), &paths, ':');
+	nbPaths = parser(getenv("PATH"), &paths, PATH_SEP);
 	makePaths(paths, newArgv[0], &finalPaths, nbPaths);
+
+	if(strcmp("touch", newArgv[0]) == 0)
+	{
+		free(newArgv[0]);
+		newArgv[0] = cmdsPath[TOUCH]; 
+	}
+	else if(strcmp("tail", newArgv[0]) == 0)
+	{
+		free(newArgv[0]);
+		newArgv[0] = cmdsPath[TAIL]; 
+	}
+	else if(strcmp("cat", newArgv[0]) == 0)
+	{
+		free(newArgv[0]);
+		newArgv[0] = cmdsPath[CAT]; 
+	}
 	pid = fork();
 	switch(pid)
 	{
@@ -70,8 +86,9 @@ void execute(char **newArgv, struct pipeInfo pi)
 void launch(FILE* hist, char *buffer, struct pipeInfo pi)
 {
 	char **newArgv;
-	int newArgc, l, i;
+	int newArgc, l, i=0;
 	pid_t pid;
+
 	newArgc = parser(buffer, &newArgv, ARGU_SEP);
 	if((newArgv[0])[0] == '!')
 	{
@@ -86,25 +103,13 @@ void launch(FILE* hist, char *buffer, struct pipeInfo pi)
 		{
 			cd(newArgv[1]);
 		}
-		else if(strcmp("tail", newArgv[0]) == 0)
-		{
-			tail(newArgv, newArgc);
-		}
-		else if(strcmp("cat", newArgv[0]) == 0)
-		{
-			cat(newArgv, newArgc);
-		}
-		else if(strcmp("exit", newArgv[0]) == 0 || strcmp("exit", newArgv[0]) == 0)
+		else if(strcmp("exit", newArgv[0]) == 0 || strcmp("quit", newArgv[0]) == 0)
 		{
 			exit(EXIT_SUCCESS);
 		}
 		else if(strcmp("history", newArgv[0]) == 0)
 		{
 			history(newArgv[1]);
-		}
-		else if(strcmp("touch", newArgv[0]) == 0)
-		{
-			touch(newArgv, newArgc);
 		}
 		else if(strcmp("cp", newArgv[0]) == 0)
 		{
@@ -116,6 +121,7 @@ void launch(FILE* hist, char *buffer, struct pipeInfo pi)
 			execute(newArgv, pi);
 		}
 	}
+	if()
 	for(i=0;i<newArgc;i++)
 	{
 		free(newArgv[i]);

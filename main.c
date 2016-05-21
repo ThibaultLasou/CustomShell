@@ -16,8 +16,15 @@ int main(int argc, char **argv, char *envp[])
 	char buffer[BUF_SIZE];
 	FILE *hist;
 	setEnvironnement();
-	histPath = histoPath();
-	hist = fopen(histPath,"a+");
+	if(!makeCmdsPath(argv[0]))
+	{
+		exit(EXIT_FAILURE);
+	}
+	hist = fopen(cmdsPath[HISTORY],"a+");
+	if(hist == NULL)
+	{
+		fprintf(stderr, "%s\n", strerror(errno));
+	}
 	printPrefix();
 	while(fgets(buffer, BUF_SIZE, stdin) != NULL)
 	{
@@ -28,6 +35,5 @@ int main(int argc, char **argv, char *envp[])
 		printPrefix();
 	}
 	printf("\n");
-	free(histPath);
 	return 0;
 }	
