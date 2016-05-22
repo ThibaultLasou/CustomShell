@@ -1,10 +1,24 @@
 #include "jobs.h"
 
+t_job jobsList[MAX_JOB];
+int nbJobs = 0;
+int fgJob = -1;
+
+void initJob(char *buffer, int pid)
+{
+	jobsList[nbJobs].cmd = strdup(buffer);
+	jobsList[nbJobs].pid = pid;
+	jobsList[nbJobs].status = RUNNING;
+	fgJob = nbJobs;
+	printf("%d\n",jobsList[fgJob].pid);
+	nbJobs++;
+}
+
 void fg(int id)
 {
 	if(id < nbJobs)
 	{
-		fgJob = 		
+		fgJob = id;		
 	}
 }
 
@@ -35,26 +49,30 @@ void initSigHandle()
 	sigaction(SIGINT, &interHandler, 0);
 
 	// SIGTSTP : Ctrl+Z
-	struct sigaction stopHandler;
-	stopHandler.sa_handler = stopHandler;
-	stopHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
-	sigaction(SIGTSTP, &stopHandler, 0);
+	struct sigaction stpHandler;
+	stpHandler.sa_handler = stopHandler;
+	stpHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
+	sigaction(SIGTSTP, &stpHandler, 0);
 
 	// SIGCHLD
 	struct sigaction chldHandler;
 	chldHandler.sa_handler = childHandler;
 	chldHandler.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT;
-	sigaction(SIGCHLD, &childHandler, 0);
+	sigaction(SIGCHLD, &chldHandler, 0);
 }
 
 void interruptHandler(int num)
 {
+	fprintf(stderr, "gauffration");
 	if(fgJob != -1)
 	{
-		kill(jobsList[fgJob].pid, SIGINT);
+		fprintf(stderr, "gauffre");
+		printf("%d",jobsList[fgJob].pid);
+		kill(jobsList[fgJob].pid, num);
 	}
 	else
 	{
+		fprintf(stderr, "gauffrette");
 		exit(EXIT_SUCCESS); // à voir
 	}
 	printf("\n");
@@ -62,5 +80,18 @@ void interruptHandler(int num)
 
 void stopHandler(int num)
 {
-	
+	if(fgJob != -1 && jobsList[fgJob].status == RUNNING)
+	{
+		kill(jobsList[fgJob].pid, num);
+	}
+	else
+	{
+		kill(getpid(), num);
+	}
+	printf("\n");
+}
+
+void childHandler(int num)
+{
+
 }

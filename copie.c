@@ -63,7 +63,7 @@ int copieDoDansDo(char *source, char *dest, struct stat statOri)
 			arg[1] = makePath(source, d->d_name); 
 			arg[2] = makePath(dest, d->d_name); 
 
-			if(cp(3, arg) != 1)
+			if(main(3, arg) != 1)
 			{
 				return 0;
 			}
@@ -132,7 +132,7 @@ int copieFiDansDo(char *ori, char *cpy, struct stat statOri)
 	return res;
 }
 
-int cp(char *argv[], int argc)
+int main(int argc, char *argv[])
 {
 	if(argc < 3)
 	{

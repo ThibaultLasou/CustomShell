@@ -37,94 +37,90 @@ void execute(char **newArgv, struct pipeInfo pi)
 		free(newArgv[0]);
 		newArgv[0] = cmdsPath[CAT]; 
 	}
-	pid = fork();
-	switch(pid)
+	if(pi.piped == true)
 	{
-		case -1 :
-			fprintf(stderr, "Erreur de forkation\n");
-			exit(EXIT_FAILURE);
-			break;
-		case 0 :
-			// Processus fils
-			if(pi.piped == true)
-			{
-				if(pi.place != LAST)
-				{
-					close(pi.pipeOutfd[0]);
-					dup2(pi.pipeOutfd[1], STDOUT_FILENO);
-				}
-				if(pi.place != FIRST)
-				{
-					close(pi.pipeInfd[1]);
-					dup2(pi.pipeInfd[0], STDIN_FILENO);
-				}
-			}
-			i = 0;
-			do // On essaye tous les chemins possibles
-			{
-				res = execv(newArgv[0], newArgv);
-				newArgv[0] = finalPaths[i];
-				i++;
-			}while(res == -1 && i<nbPaths);
-			for(i=0;i<nbPaths;i++)
-			{
-				free(paths[i]);
-				free(finalPaths[i]);
-			}
-			exit(EXIT_FAILURE);
-		default :
-			// Processus père
-			if(pi.piped == true)
-			{
-				close(pi.pipeOutfd[1]);
-			}
-			waitpid(pid, NULL, 0);
-			break;
+		if(pi.place != LAST)
+		{
+			close(pi.pipeOutfd[0]);
+			dup2(pi.pipeOutfd[1], STDOUT_FILENO);
+		}
+		if(pi.place != FIRST)
+		{
+			close(pi.pipeInfd[1]);
+			dup2(pi.pipeInfd[0], STDIN_FILENO);
+		}
 	}
+	i = 0;
+	do // On essaye tous les chemins possibles
+	{
+		res = execv(newArgv[0], newArgv);
+		newArgv[0] = finalPaths[i];
+		i++;
+	}while(res == -1 && i<nbPaths);
+	for(i=0;i<nbPaths;i++)
+	{
+		free(paths[i]);
+		free(finalPaths[i]);
+	}
+	exit(EXIT_FAILURE);
 }
 
-void launch(FILE* hist, char *buffer, struct pipeInfo pi)
+void launch(char *buffer, struct pipeInfo pi)
 {
 	char **newArgv;
-	int newArgc, l, i=0;
+	int newArgc, i;
 	pid_t pid;
 
 	newArgc = parser(buffer, &newArgv, ARGU_SEP);
-	if((newArgv[0])[0] == '!')
+	replaceTilde(newArgv);
+	if(strcmp("cd", newArgv[0]) == 0)
 	{
-		l = atoi(&((newArgv[0])[1]));
-		relaunch(hist, l);
+		cd(newArgv[1]);
+	}
+	else if(strcmp("exit", newArgv[0]) == 0 || strcmp("quit", newArgv[0]) == 0)
+	{
+		exit(EXIT_SUCCESS);
+	}
+	else if(strcmp("history", newArgv[0]) == 0)
+	{
+		history(newArgv[1]);
+	}
+
+	else if(strcmp("cp", newArgv[0]) == 0)
+	{
+		cp(newArgv, newArgc);
 	}
 	else
 	{
-		fprintf(hist, buffer);
-		replaceTilde(newArgv);
-		if(strcmp("cd", newArgv[0]) == 0)
+		pid = fork();
+		switch(pid)
 		{
-			cd(newArgv[1]);
-		}
-		else if(strcmp("exit", newArgv[0]) == 0 || strcmp("quit", newArgv[0]) == 0)
-		{
-			exit(EXIT_SUCCESS);
-		}
-		else if(strcmp("history", newArgv[0]) == 0)
-		{
-			history(newArgv[1]);
-		}
-		else if(strcmp("cp", newArgv[0]) == 0)
-		{
-			cp(newArgv, newArgc);
-		}
-		else
-		{
-			fflush(hist);
-			execute(newArgv, pi);
+			case -1 :
+				fprintf(stderr, "Erreur de forkation\n");
+				break;
+			case 0 : 
+				execute(newArgv, pi);
+				break;
+			default :
+				// Processus père
+				initJob(buffer, pid);
+				if(pi.piped == true)
+				{
+					close(pi.pipeOutfd[1]);
+				}
+				waitpid(pid, NULL, 0);
+				break;
 		}
 	}
-	if()
+
 	for(i=0;i<newArgc;i++)
 	{
-		free(newArgv[i]);
+		if(newArgv[i] != cmdsPath[TAIL] && 
+			newArgv[i] != cmdsPath[TOUCH] && 
+			newArgv[i] != cmdsPath[CAT])
+		{
+			free(newArgv[i]);
+		}
 	}
 	free(newArgv);
 }
@@ -149,69 +145,92 @@ void relaunch(FILE *histo, int line)
 
 void setPipe(FILE* hist, char *buffer)
 {
-	int nbRedir, nbPipes, redirFile, i;
+	int nbRedir, nbPipes, redirFile, i, l;
 	char **redir, **pipes, **redirPath, pipeBuffer;
 	struct pipeInfo pi;
 	int defStdin, defStdout;
+	pid_t pid;
 
-	nbRedir = parser(buffer, &redir, REDI_SEP);
-	nbPipes = parser(redir[0], &pipes, PIPE_SEP);
-	if(nbPipes > 1 || nbRedir > 1)
+	if(buffer[0] == '!')
 	{
-		pi.piped = true;
+		l = atoi(&(buffer[1]));
+		relaunch(hist, l);
 	}
-	for(i=0;i<nbPipes;i++)
+	else
 	{
-		if(pi.piped == true)
+		fprintf(hist, buffer);
+		fflush(hist);
+		nbRedir = parser(buffer, &redir, REDI_SEP);
+		nbPipes = parser(redir[0], &pipes, PIPE_SEP);
+		if(nbPipes > 1 || nbRedir > 1)
 		{
-			//on garde une copie des flux standards
-			defStdin = dup(STDIN_FILENO);
-			defStdout = dup(STDOUT_FILENO);
-			if(i != 0) // si ce n'est pas la première commande, on doit récupérer les résultats des programmes précédents
+			pi.piped = true;
+			pid = fork();
+			switch(pid)
 			{
-				pipe(pi.pipeInfd);
-				while(read(pi.pipeOutfd[0], &pipeBuffer, 1)>0)
-				{
-					write(pi.pipeInfd[1], &pipeBuffer, 1);// on transfert les résultats précédents dans le nouveau pipe pour parler au fils suivant
-				}
-				// on ferme les entrées de pipe dont on n'a plus besoin
-				close(pi.pipeInfd[1]);
-				close(pi.pipeOutfd[0]);
-			}
-			if(i != nbPipes -1)
-			{
-				pipe(pi.pipeOutfd); //on ouvre le nouveau pipe de résultat
-			}
-			//si c'est la dernière partie de la commande
-			else if(nbRedir > 1) // redirection dans un fichier
-			{
-				parser(redir[1], &redirPath, ARGU_SEP);
-				redirFile = creat(redirPath[0], S_IRWXU);
-				dup2(redirFile, STDOUT_FILENO);
-			}
-			else // on remet stdout en sortie
-			{
-				dup2(defStdout, STDOUT_FILENO);
-			}
-			if(i == 0)
-			{
-				pi.place = FIRST;
-			}
-			else if(i == nbPipes - 1)
-			{
-				pi.place = LAST;
-			}
-			else
-			{
-				pi.place = MID;
+				case 0:	
+					for(i=0;i<nbPipes;i++)
+					{
+						//on garde une copie des flux standards
+						defStdin = dup(STDIN_FILENO);
+						defStdout = dup(STDOUT_FILENO);
+						if(i != 0) // si ce n'est pas la première commande, on doit récupérer les résultats des programmes précédents
+						{
+							pipe(pi.pipeInfd);
+							while(read(pi.pipeOutfd[0], &pipeBuffer, 1)>0)
+							{
+								write(pi.pipeInfd[1], &pipeBuffer, 1);// on transfert les résultats précédents dans le nouveau pipe pour parler au fils suivant
+							}
+							// on ferme les entrées de pipe dont on n'a plus besoin
+							close(pi.pipeInfd[1]);
+							close(pi.pipeOutfd[0]);
+						}
+						if(i != nbPipes -1)
+						{
+							pipe(pi.pipeOutfd); //on ouvre le nouveau pipe de résultat
+						}
+						//si c'est la dernière partie de la commande
+						else if(nbRedir > 1) // redirection dans un fichier
+						{
+							parser(redir[1], &redirPath, ARGU_SEP);
+							redirFile = creat(redirPath[0], S_IRWXU);
+							dup2(redirFile, STDOUT_FILENO);
+						}
+						else // on remet stdout en sortie
+						{
+							dup2(defStdout, STDOUT_FILENO);
+						}
+						if(i == 0)
+						{
+							pi.place = FIRST;
+						}
+						else if(i == nbPipes - 1)
+						{
+							pi.place = LAST;
+						}
+						else
+						{
+							pi.place = MID;
+						}
+						launch(pipes[i], pi);
+					}
+					dup2(defStdin, STDIN_FILENO);
+					dup2(defStdout, STDOUT_FILENO);
+					close(redirFile);
+					exit(EXIT_SUCCESS);
+					break;
+				case -1 :
+					fprintf(stderr, "Erreur de forkation\n");
+					break;
+				default : 
+					initJob(buffer, pid);
+					waitpid(pid, NULL, 0);
 			}
 		}
-		launch(hist, pipes[i], pi);
-	}
-	if(pi.piped == true) // on remet les flux standards
-	{
-		dup2(defStdin, STDIN_FILENO);
-		dup2(defStdout, STDOUT_FILENO);
-		close(redirFile);
+		else
+		{
+			pi.piped = false;
+			launch(pipes[0], pi);
+		}
 	}
 }

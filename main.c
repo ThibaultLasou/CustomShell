@@ -16,6 +16,7 @@ int main(int argc, char **argv, char *envp[])
 	char buffer[BUF_SIZE];
 	FILE *hist;
 	setEnvironnement();
+	initSigHandle();
 	if(!makeCmdsPath(argv[0]))
 	{
 		exit(EXIT_FAILURE);

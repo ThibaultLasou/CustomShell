@@ -2,6 +2,7 @@
 #define  EXEC_INC
 
 #include "utilities.h"
+#include "jobs.h"
 
 struct pipeInfo
 {
@@ -39,7 +40,6 @@ void execute(char **newArgv, struct pipeInfo pi);
 
 /*  Fontion launch
  *	Entrées :
- *		- FILE *hist : le fichier contenant l'historique
  *		- char *buffer : la chaine entrée contenant la commande à exécuter
  *		- bool piped : indique s'il y a des pipes dans la commande
  *		- int place : indique si la commande est à une des extrémités
@@ -48,7 +48,7 @@ void execute(char **newArgv, struct pipeInfo pi);
  *
  *	Parse la chaîne entrée selon ARGU_SEP et détermine si la commande entrée est une commande interne, sinon essaye d'exécuter un fichier à ce nom
  */
-void launch(FILE* hist, char *buffer, struct pipeInfo pi);
+void launch(char *buffer, struct pipeInfo pi);
 
 /*  Fontion relaunch
  *	Entrées :

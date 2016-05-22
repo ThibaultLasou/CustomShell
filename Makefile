@@ -1,7 +1,8 @@
 CC = gcc
 EXEC = shell
-SRC = main.c cmds.c exec.c utilities.c copie.c
-CMDS = touch cat tail
+SRC = main.c cmds.c exec.c utilities.c jobs.c
+HDRS = cmds.h exec.h utilities.h jobs.h
+CMDS = touch cat tail copie
 OBJS = $(SRC:.c=.o)
 
 all: $(EXEC) $(CMDS)
