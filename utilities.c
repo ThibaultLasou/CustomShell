@@ -1,6 +1,6 @@
 #include "utilities.h"
 
-char cmdsPath[4][PATH_MAX];
+char cmdsPath[5][PATH_MAX];
 
 int parser(char *buffer, char ***elem, char sep)
 {

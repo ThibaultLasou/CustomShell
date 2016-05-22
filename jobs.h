@@ -22,6 +22,8 @@ struct job
 extern t_job jobsList[MAX_JOB];
 
 void initJob(char *buffer, int pid);
+void destrJob(int id);
+void decalage(int id);
 void fg(pid_t pid);
 void bg(pid_t pid);
 void waitJob(pid_t pid);
@@ -31,7 +33,7 @@ void ps();
 
 void initSigHandle();
 
-void interruptHandler(int num);
+void sigHandler(int num);
 void stopHandler(int num);
 void childHandler(int num);
 #endif

@@ -26,9 +26,9 @@
 #define PATH_SEP ':'
 #define PIPE_SEP '|'
 
-enum {HISTORY, CAT, TOUCH, TAIL};
+enum {HISTORY, CAT, TOUCH, TAIL, CP};
 
-extern char cmdsPath[4][PATH_MAX]; /* Variable globale, chemin vers les commandes */
+extern char cmdsPath[5][PATH_MAX]; /* Variable globale, chemin vers les commandes */
 
 /*  Fonction parser
  *	Entrées : 

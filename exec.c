@@ -37,6 +37,11 @@ void execute(char **newArgv, struct pipeInfo pi)
 		free(newArgv[0]);
 		newArgv[0] = cmdsPath[CAT]; 
 	}
+	else if(strcmp("cp", newArgv[0]) == 0)
+	{
+		free(newArgv[0]);
+		newArgv[0] = cmdsPath[CP]; 
+	}
 	if(pi.piped == true)
 	{
 		if(pi.place != LAST)
@@ -85,11 +90,19 @@ void launch(char *buffer, struct pipeInfo pi)
 	{
 		history(newArgv[1]);
 	}
-
-	else if(strcmp("cp", newArgv[0]) == 0)
+	else if(strcmp("fg", newArgv[0]) == 0)
 	{
-		cp(newArgv, newArgc);
+		fg(atoi(newArgv[1]));
 	}
+	else if(strcmp("bg", newArgv[0]) == 0)
+	{
+		bg(atoi(newArgv[1]));
+	}
+	else if(strcmp("jobs", newArgv[0]) == 0)
+	{
+		jobs();
+	}
+
 	else
 	{
 		pid = fork();
@@ -195,6 +208,7 @@ void setPipe(FILE* hist, char *buffer)
 							parser(redir[1], &redirPath, ARGU_SEP);
 							redirFile = creat(redirPath[0], S_IRWXU);
 							dup2(redirFile, STDOUT_FILENO);
+							close(redirFile);
 						}
 						else // on remet stdout en sortie
 						{
@@ -216,7 +230,6 @@ void setPipe(FILE* hist, char *buffer)
 					}
 					dup2(defStdin, STDIN_FILENO);
 					dup2(defStdout, STDOUT_FILENO);
-					close(redirFile);
 					exit(EXIT_SUCCESS);
 					break;
 				case -1 :

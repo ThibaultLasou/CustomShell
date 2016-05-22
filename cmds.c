@@ -51,11 +51,13 @@ bool makeCmdsPath(char *launchPath)
 		sprintf(cmdsPath[CAT],"%scat", shellPath);
 		sprintf(cmdsPath[TOUCH],"%stouch", shellPath);
 		sprintf(cmdsPath[TAIL],"%stail", shellPath);
+		sprintf(cmdsPath[CP],"%scp", shellPath);
 		
 		printf("%s\n", cmdsPath[HISTORY]);
 		printf("%s\n", cmdsPath[TOUCH]);
 		printf("%s\n", cmdsPath[TAIL]);
 		printf("%s\n", cmdsPath[CAT]);
+		printf("%s\n", cmdsPath[CP]);
 		return true;
 	}
 	else
