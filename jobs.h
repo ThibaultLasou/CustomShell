@@ -14,8 +14,8 @@ extern int fgJob;
 
 struct job
 {
-	pid_t pid;
 	char *cmd;
+	pid_t pid;
 	int status;
 };
 

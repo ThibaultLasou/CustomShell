@@ -51,7 +51,8 @@ void fg(int id)
 			jobsList[fgJob].status = RUNNING;
 		}
 		fgJob = id;
-		waitpid(jobsList[id].pid, NULL, WCONTINUED);
+		tcsetpgrp(STDIN_FILENO, jobsList[id].pid);
+		waitpid(jobsList[id].pid, NULL, 0);
 	}
 }
 
@@ -72,7 +73,7 @@ void jobs()
 		printf("[%d] ", i+1);
 		if(jobsList[i].status == RUNNING)
 		{
-			printf("En cours d'éxécution");
+			printf("En cours d'exécution");
 		}
 		else if(jobsList[i].status == STOPPED)
 		{

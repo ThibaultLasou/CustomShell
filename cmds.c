@@ -45,7 +45,6 @@ bool makeCmdsPath(char *launchPath)
 	{
 		pos = strrchr(shellPath, (int) '/');
 		*(pos+1) = '\0';
-		printf("%s\n", shellPath);
 
 		sprintf(cmdsPath[HISTORY],"%s.history", shellPath);
 		sprintf(cmdsPath[CAT],"%scat", shellPath);
@@ -53,11 +52,6 @@ bool makeCmdsPath(char *launchPath)
 		sprintf(cmdsPath[TAIL],"%stail", shellPath);
 		sprintf(cmdsPath[CP],"%scp", shellPath);
 		
-		printf("%s\n", cmdsPath[HISTORY]);
-		printf("%s\n", cmdsPath[TOUCH]);
-		printf("%s\n", cmdsPath[TAIL]);
-		printf("%s\n", cmdsPath[CAT]);
-		printf("%s\n", cmdsPath[CP]);
 		return true;
 	}
 	else
