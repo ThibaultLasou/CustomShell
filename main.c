@@ -10,11 +10,14 @@
 
 #include "cmds.h"
 #include "exec.h"
+#include "jobs2.h"
 
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
 	FILE *hist;
+	bool foreground;
+	job *j;
 	setEnvironnement();
 	initSigHandle();
 	if(!makeCmdsPath(argv[0]))
@@ -31,7 +34,17 @@ int main(int argc, char **argv, char *envp[])
 	{
 		if(buffer[0]!='\n')
 		{
-			setPipe(hist, buffer);
+			if(strrchr(buffer, (int) '&') == &(buffer[strlen(buffer-1)]))
+			{
+				foreground = false;
+			}
+			else
+			{
+				foreground = true;
+			}
+			j = addJob(buffer);
+			launch_job(j, foreground);
+			//setPipe(hist, buffer);
 		}
 		printPrefix();
 	}

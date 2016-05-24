@@ -206,7 +206,6 @@ void setPipe(FILE* hist, char *buffer)
 						else if(nbRedir > 1) // redirection dans un fichier
 						{
 							parser(redir[1], &redirPath, ARGU_SEP);
-							redirFile = creat(redirPath[0], S_IRWXU);
 							dup2(redirFile, STDOUT_FILENO);
 							close(redirFile);
 						}
