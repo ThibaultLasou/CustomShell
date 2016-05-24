@@ -16,7 +16,7 @@ void initJob(char *buffer, int pid)
 	nbJobs++;
 }
 
-void destrJob(int id)
+void destruJob(int id)
 {
 	free(jobsList[id].cmd);
 	if(id == fgJob)

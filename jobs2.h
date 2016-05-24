@@ -27,6 +27,7 @@ struct s_job
 	char *command;              /* command line, used for messages */
 	process *first_process;     /* list of processes in this job */
 	pid_t pgid;                 /* process group ID */
+	struct termios tmodes;
 	bool notified;              /* true if user told about stopped job */
 	int in, out, err;  /* standard i/o channels */
 };
@@ -36,8 +37,8 @@ job *createJob(char *command);
 process *createProcess(char *command);
 
 job *find_job(pid_t pgid);
-int job_is_stopped(job *j);
-int job_is_completed(job *j);
+bool job_is_stopped(job *j);
+bool job_is_completed(job *j);
 
 void init_shell();
 

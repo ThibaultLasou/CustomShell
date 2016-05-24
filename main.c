@@ -19,7 +19,8 @@ int main(int argc, char **argv, char *envp[])
 	bool foreground;
 	job *j;
 	setEnvironnement();
-	initSigHandle();
+//	initSigHandle();
+	init_shell();
 	if(!makeCmdsPath(argv[0]))
 	{
 		exit(EXIT_FAILURE);
@@ -34,8 +35,10 @@ int main(int argc, char **argv, char *envp[])
 	{
 		if(buffer[0]!='\n')
 		{
-			if(strrchr(buffer, (int) '&') == &(buffer[strlen(buffer-1)]))
+			if(strrchr(buffer, (int) '&') == &(buffer[strlen(buffer)-2]))
 			{
+				buffer[strlen(buffer)-2] = '\n';
+				buffer[strlen(buffer)-1] = '\0';
 				foreground = false;
 			}
 			else
@@ -44,6 +47,7 @@ int main(int argc, char **argv, char *envp[])
 			}
 			j = addJob(buffer);
 			launch_job(j, foreground);
+			do_job_notification();
 			//setPipe(hist, buffer);
 		}
 		printPrefix();
