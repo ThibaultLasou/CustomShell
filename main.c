@@ -12,14 +12,13 @@
 #include "exec.h"
 #include "jobs2.h"
 
+FILE *hist;
+
 int main(int argc, char **argv, char *envp[])
 {
 	char buffer[BUF_SIZE];
-	FILE *hist;
-	bool foreground;
-	job *j;
+	int l;
 	setEnvironnement();
-//	initSigHandle();
 	init_shell();
 	if(!makeCmdsPath(argv[0]))
 	{
@@ -35,20 +34,17 @@ int main(int argc, char **argv, char *envp[])
 	{
 		if(buffer[0]!='\n')
 		{
-			if(strrchr(buffer, (int) '&') == &(buffer[strlen(buffer)-2]))
+			if(buffer[0] == '!')
 			{
-				buffer[strlen(buffer)-2] = '\n';
-				buffer[strlen(buffer)-1] = '\0';
-				foreground = false;
+				l = atoi(&(buffer[1]));
+				relaunch(l);
 			}
 			else
 			{
-				foreground = true;
+				fprintf(hist, "%s", buffer);
+				fflush(hist);
+				launch(buffer);
 			}
-			j = addJob(buffer);
-			launch_job(j, foreground);
-			do_job_notification();
-			//setPipe(hist, buffer);
 		}
 		printPrefix();
 	}

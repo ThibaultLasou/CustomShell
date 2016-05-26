@@ -1,7 +1,7 @@
 CC = gcc
 EXEC = shell
-SRC = main.c cmds.c exec.c utilities.c jobs.c jobs2.c
-HDRS = cmds.h exec.h utilities.h jobs.h jobs2.h
+SRC = main.c cmds.c exec.c utilities.c jobs2.c
+HDRS = cmds.h exec.h utilities.h jobs2.h
 CMDS = touch cat tail cp
 OBJS = $(SRC:.c=.o)
 
@@ -14,7 +14,7 @@ $(CMDS): %:%.o
 	$(CC) -o $@ $^
 
 %.o : %.c 
-	$(CC) -o $@ -c $< -g
+	$(CC) -o $@ -c $< -g -Wall
 
 clean:
 	rm $(EXEC) *.o $(CMDS)

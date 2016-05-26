@@ -26,6 +26,8 @@
 #define PATH_SEP ':'
 #define PIPE_SEP '|'
 
+extern FILE *hist;
+
 enum {HISTORY, CAT, TOUCH, TAIL, CP};
 
 extern char cmdsPath[5][PATH_MAX]; /* Variable globale, chemin vers les commandes */
@@ -62,4 +64,15 @@ void replaceTilde(char **args);
  *  Affiche l'invite de commandes 
  */
 void printPrefix();
+
+/*  Fonction : makePaths
+ *	Entrées : 
+ *			- char **paths : tableau qui contient les différents chemins du path
+ *			- char *exec	: nom du programme à lancer
+ *			- char ***finalPaths : tableau qui contiendra les différents chemins possibles
+ *			- int nbPaths : taille du tableau paths
+ *	
+ *	Crée les différents chemins possibles pour exec 
+ */
+void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths);
 #endif

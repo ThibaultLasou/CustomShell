@@ -1,248 +1,217 @@
 #include "exec.h"
 
-void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
-{
-	int i;
-	*finalPaths = malloc(sizeof(char *)*nbPaths);
-	for(i=0;i<nbPaths;i++)
-	{
-		(*finalPaths)[i] = malloc(sizeof(char)*(strlen(paths[0])+strlen(exec)+1));
-		strcpy((*finalPaths)[i], paths[i]);
-		strcat((*finalPaths)[i], "/");
-		strcat((*finalPaths)[i], exec);
-	}
-}
-
-void execute(char **newArgv, struct pipeInfo pi)
+void launch_process(process *p, pid_t pgid, int infile, int outfile, int errfile, bool foreground)
 {
 	pid_t pid;
-	int res, i, nbPaths;
-	char **paths;
-	char **finalPaths;
-	nbPaths = parser(getenv("PATH"), &paths, PATH_SEP);
-	makePaths(paths, newArgv[0], &finalPaths, nbPaths);
+	char **paths, **finalPaths;
+	int i, res, nbPaths;
 
-	if(strcmp("touch", newArgv[0]) == 0)
+	/* Put the process into the process group and give the process group
+	   the terminal, if appropriate.
+	   This has to be done both by the shell and in the individual
+	   child processes because of potential race conditions.  */
+	pid = getpid();
+	if(pgid == 0)
 	{
-		free(newArgv[0]);
-		newArgv[0] = cmdsPath[TOUCH]; 
-	}
-	else if(strcmp("tail", newArgv[0]) == 0)
+		pgid = pid;
+	}	
+	setpgid (pid, pgid);
+	if(foreground)
 	{
-		free(newArgv[0]);
-		newArgv[0] = cmdsPath[TAIL]; 
+		tcsetpgrp (shell_terminal, pgid);
 	}
-	else if(strcmp("cat", newArgv[0]) == 0)
+
+	/* Set the handling for job control signals back to the default.  */
+	signal (SIGINT, SIG_DFL);
+	signal (SIGQUIT, SIG_DFL);
+	signal (SIGTSTP, SIG_DFL);
+	signal (SIGTTIN, SIG_DFL);
+	signal (SIGTTOU, SIG_DFL);
+	signal (SIGCHLD, SIG_DFL);
+
+	/* Set the standard input/output channels of the new process.  */
+	if(infile != STDIN_FILENO)
 	{
-		free(newArgv[0]);
-		newArgv[0] = cmdsPath[CAT]; 
+		dup2(infile, STDIN_FILENO);
+		close(infile);
 	}
-	else if(strcmp("cp", newArgv[0]) == 0)
+	if(outfile != STDOUT_FILENO)
 	{
-		free(newArgv[0]);
-		newArgv[0] = cmdsPath[CP]; 
+		dup2(outfile, STDOUT_FILENO);
+		close(outfile);
 	}
-	if(pi.piped == true)
+	if(errfile != STDERR_FILENO)
 	{
-		if(pi.place != LAST)
-		{
-			close(pi.pipeOutfd[0]);
-			dup2(pi.pipeOutfd[1], STDOUT_FILENO);
-		}
-		if(pi.place != FIRST)
-		{
-			close(pi.pipeInfd[1]);
-			dup2(pi.pipeInfd[0], STDIN_FILENO);
-		}
+		dup2(errfile, STDERR_FILENO);
+		close(errfile);
+	}    
+
+	if(strcmp("touch", p->argv[0]) == 0)
+	{
+		free(p->argv[0]);
+		p->argv[0] = cmdsPath[TOUCH]; 
 	}
+	else if(strcmp("tail", p->argv[0]) == 0)
+	{
+		free(p->argv[0]);
+		p->argv[0] = cmdsPath[TAIL]; 
+	}
+	else if(strcmp("cat", p->argv[0]) == 0)
+	{
+		free(p->argv[0]);
+		p->argv[0] = cmdsPath[CAT]; 
+	}
+	else if(strcmp("cp", p->argv[0]) == 0)
+	{
+		free(p->argv[0]);
+		p->argv[0] = cmdsPath[CP]; 
+	}
+
 	i = 0;
+	nbPaths = parser(getenv("PATH"), &paths, PATH_SEP);
+	makePaths(paths, p->argv[0], &finalPaths, nbPaths);
 	do // On essaye tous les chemins possibles
 	{
-		res = execv(newArgv[0], newArgv);
-		newArgv[0] = finalPaths[i];
+		res = execv(p->argv[0], p->argv);
+		p->argv[0] = finalPaths[i];
 		i++;
 	}while(res == -1 && i<nbPaths);
-	for(i=0;i<nbPaths;i++)
+	if(res == -1)
 	{
-		free(paths[i]);
-		free(finalPaths[i]);
+		fprintf(stderr, "%s", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
-	exit(EXIT_FAILURE);
 }
 
-void launch(char *buffer, struct pipeInfo pi)
+void launch_job(job *j, bool foreground)
 {
-	char **newArgv;
-	int newArgc, i;
+	process *p;
 	pid_t pid;
+	int mypipe[2], infile, outfile;
 
-	newArgc = parser(buffer, &newArgv, ARGU_SEP);
-	replaceTilde(newArgv);
-	if(strcmp("cd", newArgv[0]) == 0)
+	infile = j->in;
+	for(p = j->first_process; p; p = p->next)
 	{
-		cd(newArgv[1]);
-	}
-	else if(strcmp("exit", newArgv[0]) == 0 || strcmp("quit", newArgv[0]) == 0)
-	{
-		exit(EXIT_SUCCESS);
-	}
-	else if(strcmp("history", newArgv[0]) == 0)
-	{
-		history(newArgv[1]);
-	}
-	else if(strcmp("fg", newArgv[0]) == 0)
-	{
-		fg(atoi(newArgv[1]));
-	}
-	else if(strcmp("bg", newArgv[0]) == 0)
-	{
-		bg(atoi(newArgv[1]));
-	}
-	else if(strcmp("jobs", newArgv[0]) == 0)
-	{
-		jobs();
+		/* Set up pipes, if necessary.  */
+		if(p->next)
+		{
+			if(pipe (mypipe) < 0)
+			{
+				perror("pipe");
+				exit(1);
+			}
+			outfile = mypipe[1];
+		}
+		else
+		{
+			outfile = j->out;
+		}
+		/* Fork the child processes.  */
+		replaceTilde(p->argv);
+		if(strcmp("cd", p->argv[0]) == 0)
+		{
+			cd(p->argv[1]);
+		}
+		else if(strcmp("exit", p->argv[0]) == 0 || strcmp("quit", p->argv[0]) == 0)
+		{
+			exit(EXIT_SUCCESS);
+		}
+		else if(strcmp("history", p->argv[0]) == 0)
+		{
+			history(p->argv[1]);
+		}
+		else if(strcmp("fg", p->argv[0]) == 0)
+		{
+			fg(atoi(p->argv[1]));
+		}
+		else if(strcmp("bg", p->argv[0]) == 0)
+		{
+			bg(atoi(p->argv[1]));
+		}
+		else if(strcmp("jobs", p->argv[0]) == 0)
+		{
+			jobs();
+		}
+		else
+		{
+			pid = fork();
+			if(pid == 0) 
+			{
+				/* This is the child process.  */
+				launch_process (p, j->pgid, infile,	outfile, j->err, foreground);
+			}
+			else if(pid < 0)
+			{
+				/* The fork failed.  */
+				fprintf(stderr, "%s", strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+			else
+			{
+				/* This is the parent process.  */
+				p->pid = pid;
+				if(j->pgid == 0)
+				{
+					j->pgid = pid;
+				}
+				setpgid(pid, j->pgid);
+			}
+		}
+		/* Clean up after pipes.  */
+		if(infile != STDIN_FILENO)
+		{
+			close(infile);
+		}
+		if(outfile != STDOUT_FILENO)
+		{
+			close(outfile);
+		}
+		infile = mypipe[0];
 	}
 
+	if(foreground)
+	{
+		put_job_in_foreground(j, false);
+	}
 	else
 	{
-		pid = fork();
-		switch(pid)
-		{
-			case -1 :
-				fprintf(stderr, "Erreur de forkation\n");
-				break;
-			case 0 : 
-				execute(newArgv, pi);
-				break;
-			default :
-				// Processus père
-				initJob(buffer, pid);
-				if(pi.piped == true)
-				{
-					close(pi.pipeOutfd[1]);
-				}
-				waitpid(pid, NULL, 0);
-				break;
-		}
+		put_job_in_background(j, false);
 	}
-
-	for(i=0;i<newArgc;i++)
-	{
-		if(newArgv[i] != cmdsPath[TAIL] && 
-			newArgv[i] != cmdsPath[TOUCH] && 
-			newArgv[i] != cmdsPath[CAT])
-		{
-			free(newArgv[i]);
-		}
-	}
-	free(newArgv);
 }
 
-void relaunch(FILE *histo, int line)
+void relaunch(int line)
 {
 	char buffer[BUF_SIZE];
 	int i = 0;
-	fseek(histo, 0, SEEK_SET);
-	while(fgets(buffer, BUF_SIZE, histo) != NULL)
+	fseek(hist, 0, SEEK_SET);
+	while(fgets(buffer, BUF_SIZE, hist) != NULL)
 	{
 		i++;
 		if(i == line)
 		{
-			fseek(histo, 0, SEEK_END);
+			fseek(hist, 0, SEEK_END);
 			printf("%s\n", buffer);
-			setPipe(histo, buffer);
+			launch(buffer);
 			return;
 		}
 	}
 }
 
-void setPipe(FILE* hist, char *buffer)
+void launch(char *buffer)
 {
-	int nbRedir, nbPipes, redirFile, i, l;
-	char **redir, **pipes, **redirPath, pipeBuffer;
-	struct pipeInfo pi;
-	int defStdin, defStdout;
-	pid_t pid;
-
-	if(buffer[0] == '!')
+	bool foreground;
+	job *j;
+	if(strrchr(buffer, (int) '&') == &(buffer[strlen(buffer)-2]))
 	{
-		l = atoi(&(buffer[1]));
-		relaunch(hist, l);
+		buffer[strlen(buffer)-2] = '\n';
+		buffer[strlen(buffer)-1] = '\0';
+		foreground = false;
 	}
 	else
 	{
-		fprintf(hist, buffer);
-		fflush(hist);
-		nbRedir = parser(buffer, &redir, REDI_SEP);
-		nbPipes = parser(redir[0], &pipes, PIPE_SEP);
-		if(nbPipes > 1 || nbRedir > 1)
-		{
-			pi.piped = true;
-			pid = fork();
-			switch(pid)
-			{
-				case 0:	
-					for(i=0;i<nbPipes;i++)
-					{
-						//on garde une copie des flux standards
-						defStdin = dup(STDIN_FILENO);
-						defStdout = dup(STDOUT_FILENO);
-						if(i != 0) // si ce n'est pas la première commande, on doit récupérer les résultats des programmes précédents
-						{
-							pipe(pi.pipeInfd);
-							while(read(pi.pipeOutfd[0], &pipeBuffer, 1)>0)
-							{
-								write(pi.pipeInfd[1], &pipeBuffer, 1);// on transfert les résultats précédents dans le nouveau pipe pour parler au fils suivant
-							}
-							// on ferme les entrées de pipe dont on n'a plus besoin
-							close(pi.pipeInfd[1]);
-							close(pi.pipeOutfd[0]);
-						}
-						if(i != nbPipes -1)
-						{
-							pipe(pi.pipeOutfd); //on ouvre le nouveau pipe de résultat
-						}
-						//si c'est la dernière partie de la commande
-						else if(nbRedir > 1) // redirection dans un fichier
-						{
-							parser(redir[1], &redirPath, ARGU_SEP);
-							dup2(redirFile, STDOUT_FILENO);
-							close(redirFile);
-						}
-						else // on remet stdout en sortie
-						{
-							dup2(defStdout, STDOUT_FILENO);
-						}
-						if(i == 0)
-						{
-							pi.place = FIRST;
-						}
-						else if(i == nbPipes - 1)
-						{
-							pi.place = LAST;
-						}
-						else
-						{
-							pi.place = MID;
-						}
-						launch(pipes[i], pi);
-					}
-					dup2(defStdin, STDIN_FILENO);
-					dup2(defStdout, STDOUT_FILENO);
-					exit(EXIT_SUCCESS);
-					break;
-				case -1 :
-					fprintf(stderr, "Erreur de forkation\n");
-					break;
-				default : 
-					initJob(buffer, pid);
-					waitpid(pid, NULL, 0);
-			}
-		}
-		else
-		{
-			pi.piped = false;
-			launch(pipes[0], pi);
-		}
+		foreground = true;
 	}
+	j = addJob(buffer);
+	launch_job(j, foreground);
+	do_job_notification();
 }

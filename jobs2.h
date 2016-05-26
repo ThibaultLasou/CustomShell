@@ -1,6 +1,9 @@
+#ifndef  JOBS2_INC
+#define  JOBS2_INC
+
 #include <termios.h>
 
-#include "utilities.h"
+#include "cmds.h"
 
 typedef struct s_process process;
 typedef struct s_job job;
@@ -55,3 +58,5 @@ void update_status();
 void format_job_info(job *j, const char *status);
 void do_job_notification();
 void mark_job_as_running(job *j);
+
+#endif   /* ----- #ifndef JOBS2_INC  ----- */

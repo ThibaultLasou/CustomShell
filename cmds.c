@@ -20,21 +20,18 @@ void cd(char *path)
 
 void history(char *arg)
 {
-	char *args[4];
+	char *cmd;
 	if(arg == NULL)
 	{
-		args[0] = "cat";
-		args[1] = "-n";
-		args[2] = cmdsPath[HISTORY];
+		cmd = malloc(sizeof(char)*strlen(cmdsPath[HISTORY])+strlen("cat -n")+1);
+		sprintf(cmd, "cat -n %s", cmdsPath[HISTORY]);
 	}
 	else
 	{
-		args[0] = "tail";
-		args[1] = malloc(sizeof(char)*(strlen(arg)+4));
-		sprintf(args[1],"-n=%s", arg);
-		args[2] = cmdsPath[HISTORY];
-		free(args[1]);
+		cmd = malloc(sizeof(char)*strlen(cmdsPath[HISTORY])+strlen("tail -n=")+strlen(arg)+1);
+		sprintf(cmd, "tail -n=%s %s", arg, cmdsPath[HISTORY]);
 	}
+	launch(cmd);
 }
 
 bool makeCmdsPath(char *launchPath)

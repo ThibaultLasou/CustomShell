@@ -1,6 +1,21 @@
 #include "utilities.h"
 
+FILE *hist;
+
 char cmdsPath[5][PATH_MAX];
+
+void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
+{
+	int i;
+	*finalPaths = malloc(sizeof(char *)*nbPaths);
+	for(i=0;i<nbPaths;i++)
+	{
+		(*finalPaths)[i] = malloc(sizeof(char)*(strlen(paths[0])+strlen(exec)+1));
+		strcpy((*finalPaths)[i], paths[i]);
+		strcat((*finalPaths)[i], "/");
+		strcat((*finalPaths)[i], exec);
+	}
+}
 
 int parser(char *buffer, char ***elem, char sep)
 {
