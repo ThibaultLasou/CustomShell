@@ -26,12 +26,6 @@
 #define PATH_SEP ':'
 #define PIPE_SEP '|'
 
-extern FILE *hist;
-
-enum {HISTORY, CAT, TOUCH, TAIL, CP};
-
-extern char cmdsPath[5][PATH_MAX]; /* Variable globale, chemin vers les commandes */
-
 /*  Fonction parser
  *	Entrées : 
  *		- char *buffer : la chaine de caracteres à parser.

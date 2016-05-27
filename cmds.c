@@ -1,5 +1,9 @@
 #include "cmds.h"
 
+FILE *hist;
+
+char cmdsPath[5][PATH_MAX];
+
 void cd(char *path)
 {
 	char *WD;

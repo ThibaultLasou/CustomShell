@@ -1,8 +1,5 @@
 #include "utilities.h"
 
-FILE *hist;
-
-char cmdsPath[5][PATH_MAX];
 
 void makePaths(char **paths, char *exec, char ***finalPaths, int nbPaths)
 {
